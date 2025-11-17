@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/layout">
+
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>emakCrm</title>
+<link rel="shortcut icon" type="image/png"
+	th:href="@{/ressources/images/logos/favicon.png}" />
+<link rel="stylesheet" th:href="@{/ressources/css/styles.min.css}" />
+</head>
+
+<body>
+	<!--  Body Wrapper -->
+	<div class="page-wrapper" id="main-wrapper" data-layout="vertical"
+		data-navbarbg="skin6" data-sidebartype="full"
+		data-sidebar-position="fixed" data-header-position="fixed">
+		<!-- Sidebar Start -->
+		<aside class="left-sidebar">
+			<!-- Sidebar scroll-->
+			<div>
+				<div
+					class="brand-logo d-flex align-items-center justify-content-between">
+					<a th:href="@{/index}" class="text-nowrap logo-img"> <img
+						th:src="@{/ressources/images/logos/dark-logo.svg}" width="180"
+						alt="" />
+					</a>
+					<div
+						class="close-btn d-xl-none d-block sidebartoggler cursor-pointer"
+						id="sidebarCollapse">
+						<i class="ti ti-x fs-8"></i>
+					</div>
+				</div>
+				<!-- Sidebar navigation-->
+				<nav class="sidebar-nav scroll-sidebar" data-simplebar="">
+					<ul id="sidebarnav">
+						<li class="nav-small-cap"><i
+							class="ti ti-dots nav-small-cap-icon fs-4"></i> <span
+							class="hide-menu">Acceuil</span></li>
+						<li class="sidebar-item"><a
+							th:classappend="${pageActive} == 'dashboard' ? 'active' : ''"
+							class="sidebar-link" th:href="@{/index}" aria-expanded="false">
+								<span> <i class="ti ti-layout-dashboard"></i>
+							</span> <span class="hide-menu">Dashboard</span>
+						</a></li>
+						<li class="nav-small-cap"><i
+							class="ti ti-dots nav-small-cap-icon fs-4"></i> <span
+							class="hide-menu">SERVICES</span></li>
+						<li class="sidebar-item"><a
+							th:classappend="${pageActive} == 'clients' ? 'active' : ''"
+							class="sidebar-link" th:href="@{/clients}" aria-expanded="false">
+								<span> <i class="ti ti-users"></i>
+							</span> <span class="hide-menu">Clients</span>
+						</a></li>
+						<li class="sidebar-item"><a
+							th:classappend="${pageActive} == 'produits' ? 'active' : ''"
+							class="sidebar-link" th:href="@{/produits}" aria-expanded="false">
+								<span> <i class="ti ti-package"></i>
+							</span> <span class="hide-menu">Produits</span>
+						</a></li>
+						<li class="nav-small-cap"><i class="ti ti-dollars"></i> <span
+							class="hide-menu">Ventes/Devis/Facture</span></li>
+						<li class="sidebar-item"><a
+							th:classappend="${pageActive} == 'ventes' ? 'active' : ''"
+							class="sidebar-link" th:href="@{/ventes}" aria-expanded="false">
+								<span> <i class="ti ti-file-invoice"></i>
+							</span> <span class="hide-menu">Ventes</span>
+						</a></li>
+						
+						<li class="sidebar-item"><a
+							th:classappend="${pageActive} == 'devis' ? 'active' : ''"
+							class="sidebar-link" th:href="@{/devis}" aria-expanded="false">
+								<span> <i class="ti ti-file-invoice"></i>
+							</span> <span class="hide-menu">Devis</span>
+						</a></li>
+						
+						<li class="sidebar-item"><a
+							th:classappend="${pageActive} == 'factures' ? 'active' : ''"
+							class="sidebar-link" th:href="@{/factures}" aria-expanded="false">
+								<span> <i class="ti ti-file-invoice"></i>
+							</span> <span class="hide-menu">Facture</span>
+						</a></li>
+						<li class="sidebar-item"><a
+							th:classappend="${pageActive} == 'paiements' ? 'active' : ''"
+							class="sidebar-link" th:href="@{/paiements}"
+							aria-expanded="false"> <span> <i class="ti ti-cash"></i>
+							</span> <span class="hide-menu">Paiements</span>
+						</a></li>
+						<li class="sidebar-item"><a
+							th:classappend="${pageActive} == 'statistiques' ? 'active' : ''"
+							class="sidebar-link" th:href="@{/statistiques}"
+							aria-expanded="false"> <span> <i
+									class="ti ti-chart-bar"></i>
+							</span> <span class="hide-menu">Statistiques</span>
+						</a></li>
+
+
+						<li class="nav-small-cap"><i class="ti ti-shield-lock"></i> <span
+							class="hide-menu">Utilisateurs/Roles</span></li>
+						<li class="sidebar-item"><a
+							th:classappend="${pageActive} == 'utilisateurs' ? 'active' : ''"
+							class="sidebar-link" th:href="@{/utilisateurs}"
+							aria-expanded="false"> <span> <i class="ti ti-users"></i>
+							</span> <span class="hide-menu">Utilisateurs</span>
+						</a></li>
+
+						<li class="sidebar-item"><a class="sidebar-link"
+							th:href="@{/logout}" aria-expanded="false"> <span> <i
+									class="ti ti-logout"></i>
+							</span> <span class="hide-menu">Deconnexion</span>
+						</a></li>
+					</ul>
+				</nav>
+				<!-- End Sidebar navigation -->
+			</div>
+			<!-- End Sidebar scroll-->
+		</aside>
+		<!--  Sidebar End -->
+		<!--  Main wrapper -->
+		<div class="body-wrapper">
+			<!--  Header Start -->
+			<header class="app-header">
+				<nav class="navbar navbar-expand-lg navbar-light">
+					<ul class="navbar-nav">
+						<li class="nav-item d-block d-xl-none"><a
+							class="nav-link sidebartoggler nav-icon-hover"
+							id="headerCollapse" href="javascript:void(0)"> <i
+								class="ti ti-menu-2"></i>
+						</a></li>
+					</ul>
+					<div class="navbar-collapse justify-content-end px-0"
+						id="navbarNav">
+						<ul
+							class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
+							<li class="nav-item dropdown"><a
+								class="nav-link nav-icon-hover" href="javascript:void(0)"
+								id="drop2" data-bs-toggle="dropdown" aria-expanded="false">
+									<img th:src="@{/ressources/images/profile/user-1.jpg}" alt=""
+									width="35" height="35" class="rounded-circle">
+							</a>
+								<div
+									class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up"
+									aria-labelledby="drop2">
+									<div class="message-body">
+										<a href="javascript:void(0)"
+											class="d-flex align-items-center gap-2 dropdown-item"> <i
+											class="ti ti-user fs-6"></i>
+											<p class="mb-0 fs-3">Profile</p>
+										</a> <a href="javascript:void(0)"
+											class="d-flex align-items-center gap-2 dropdown-item"> <i
+											class="ti ti-mail fs-6"></i>
+											<p class="mb-0 fs-3">Mon Compte</p>
+										</a> <a href="@{/logout}"
+											class="btn btn-outline-primary mx-3 mt-2 d-block">Deconnexion</a>
+									</div>
+								</div></li>
+						</ul>
+					</div>
+				</nav>
+			</header>
+			<!--  Header End -->
+			<div class="container-fluid">
+				<div layout:fragment="content"></div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+function confirmDelete(url) {
+    const btn = document.getElementById('deleteConfirmBtn');
+    btn.setAttribute('href', url);
+    const modal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+    modal.show();
+}
+</script>
+	<script>
+    setTimeout(() => {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            const bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
+        });
+    }, 2000); // 3 secondes
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+	<script th:src="@{/ressources/libs/jquery/dist/jquery.min.js}"></script>
+	<script
+		th:src="@{/ressources/libs/bootstrap/dist/js/bootstrap.bundle.min.js}"></script>
+	<script th:src="@{/ressources/js/sidebarmenu.js}"></script>
+	<script th:src="@{/ressources/js/app.min.js}"></script>
+	<script th:src="@{/ressources/libs/apexcharts/dist/apexcharts.min.js}"></script>
+	<script th:src="@{/ressources/libs/simplebar/dist/simplebar.js}"></script>
+
+</body>
+
+</html>

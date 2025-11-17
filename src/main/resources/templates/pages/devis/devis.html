@@ -1,0 +1,92 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/layout"
+	layout:decorate="layout/layout"
+	>
+<body>
+<div layout:fragment="content">
+
+  <header class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Devis</h2>
+    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#devisModal">+ Nouveau Devis</button>
+  </header>
+
+  <table class="table table-hover">
+    <thead class="table-light">
+      <tr>
+        <th>#</th>
+        <th>Client</th>
+        <th>Montant</th>
+        <th>Statut</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr th:each="devis : ${devisPage.content}">
+        <td th:text="${devis.id}">1</td>
+        <td th:text="${devis.clientNom}">Client X</td>
+        <td th:text="${devis.montantTotal}">1000</td>
+        <td>
+          <span th:text="${devis.statut}" th:classappend="${devis.statut}=='EN_ATTENTE'?'badge bg-warning':'badge bg-success'"></span>
+         <!-- 
+         <span th:if="${devis.converti}" class="badge bg-success">Vente #<span th:text="${devis.venteId}"></span></span>
+         --> 
+        </td>
+        <td>
+          <!-- <a th:if="${!devis.converti}" href="javascript:void(0);" th:onclick="'convertToVente(' + ${devis.id} + ')'" class="btn btn-sm btn-success">Convertir en vente</a>
+          <a th:href="@{/clients(id=${devis.clientId})}" class="btn btn-sm btn-secondary">Client</a>-->
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Pagination -->
+  <nav>
+    <ul class="pagination justify-content-center">
+      <li class="page-item" th:classappend="${devisPage.first} ? 'disabled'">
+        <a class="page-link" th:href="@{/devis(page=${devisPage.number - 1})}">Précédent</a>
+      </li>
+      <li class="page-item" th:each="i : ${#numbers.sequence(0,devisPage.totalPages -1)}"
+          th:classappend="${i == devisPage.number} ? 'active'">
+        <a class="page-link" th:href="@{/devis(page=${i})}" th:text="${i+1}">1</a>
+      </li>
+      <li class="page-item" th:classappend="${devisPage.last} ? 'disabled'">
+        <a class="page-link" th:href="@{/devis(page=${devisPage.number + 1})}">Suivant</a>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- Modal Nouveau Devis -->
+  <div class="modal fade" id="devisModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <form th:action="@{/devis/enregistrer}" method="post">
+          <div class="modal-header">
+            <h5 class="modal-title">Nouveau Devis</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Client</label>
+                <select class="form-select" name="clientId">
+                  <option th:each="c : ${clients}" th:value="${c.id}" th:text="${c.nom}"></option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Montant Total</label>
+                <input type="number" step="0.01" name="montantTotal" class="form-control">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script th:src="@{/ressources/js/devis.js}" defer></script>
+</body>
+</html>

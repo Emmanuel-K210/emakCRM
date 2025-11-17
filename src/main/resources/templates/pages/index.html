@@ -1,0 +1,70 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/layout"
+      layout:decorate="layout/layout">
+<body>
+<div layout:fragment="content" class="container-fluid">
+
+    <!-- ======= Cartes résumé ======= -->
+    <div class="row g-3 mt-3">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5>Total Clients</h5>
+                    <h2 th:text="${totalClients}">0</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5>Total Ventes</h5>
+                    <h2 th:text="${totalVentes}">0</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5>Montant Factures</h5>
+                    <h2 th:text="${montantFactures}">0.00</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5>Factures Non Payées</h5>
+                    <h2 th:text="${facturesNonPayees}">0</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======= Graphiques ======= -->
+    <div class="row g-3 mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">Ventes par mois</div>
+                <div class="card-body">
+                    <canvas id="ventesParMoisChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">Opportunités par étape</div>
+                <div class="card-body">
+                    <canvas id="opportunitesParEtapeChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+<script th:src="@{/ressources/js/dashboard.js}" defer></script>
+</div>
+
+<!-- ======= Script Chart.js ======= -->
+
+
+</body>
+</html>

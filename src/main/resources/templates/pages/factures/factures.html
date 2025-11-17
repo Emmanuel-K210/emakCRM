@@ -1,0 +1,113 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/layout"
+      layout:decorate="layout/layout">
+<body>
+<div layout:fragment="content">
+    <header class="d-flex justify-content-between align-items-center p-3 border-bottom">
+        <h2>Factures</h2>
+        <div class="d-flex align-items-center">
+            <input type="text" class="form-control form-control-sm me-2" placeholder="Rechercher...">
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#factureModal">+ Nouvelle facture</button>
+        </div>
+    </header>
+
+    <div class="table-responsive mt-3">
+        <table class="table table-hover align-middle mt-3">
+            <thead class="table-light">
+            <tr>
+                <th>Vente</th>
+                <th>Client</th>
+                <th>Montant</th>
+                <th>Date</th>
+                <th>Statut</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="facture : ${facturesPage.content}">
+                <td th:text="${facture.venteId}">Vente</td>
+                <td th:text="${facture.clientNom}">Client</td>
+                <td th:text="${facture.montant}">0.00</td>
+                <td th:text="${facture.dateEmission}">2025-01-01</td>
+                <td><span th:text="${facture.statut}"
+                          th:classappend="${facture.statut}=='NON_PAYEE' ? 'badge bg-warning' : 'badge bg-success'">
+                    NON_PAYEE
+                </span></td>
+                <td>
+                    <a href="javascript:void(0);" th:onclick="'openEditModal(' + ${facture.id} + ')'" class="btn btn-sm btn-warning" title="Modifier">
+                        <i class="ti ti-pencil"></i>
+                    </a>
+                    <a href="javascript:void(0);" th:onclick="'confirmDelete(\'/factures/supprimer?id=' + ${facture.id} + '\')'" class="btn btn-sm btn-danger" title="Supprimer">
+                        <i class="ti ti-trash"></i>
+                    </a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <nav aria-label="Page navigation" class="mt-3">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" th:classappend="${facturesPage.first} ? 'disabled'">
+                    <a class="page-link" th:href="@{/factures(page=${facturesPage.number - 1})}">Précédent</a>
+                </li>
+                <li class="page-item" th:each="i : ${#numbers.sequence(0, facturesPage.totalPages -1)}"
+                    th:classappend="${i == facturesPage.number} ? 'active'">
+                    <a class="page-link" th:href="@{/factures(page=${i})}" th:text="${i + 1}">1</a>
+                </li>
+                <li class="page-item" th:classappend="${facturesPage.last} ? 'disabled'">
+                    <a class="page-link" th:href="@{/factures(page=${facturesPage.number + 1})}">Suivant</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- MODAL CREATION / EDIT FACTURE -->
+    <div class="modal fade" id="factureModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form th:action="@{/factures/enregistrer}" method="post">
+                    <input type="hidden" name="id" id="factureId">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalTitle">Nouvelle facture</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="venteId" class="form-label">Vente</label>
+                                <select class="form-select" id="venteId" name="venteId" required>
+                                    <option th:each="v : ${ventes}" th:value="${v.id}" th:text="${v.id}">Vente</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="clientId" class="form-label">Client</label>
+                                <select class="form-select" id="clientId" name="clientId" required>
+                                    <option th:each="c : ${clients}" th:value="${c.id}" th:text="${c.nom}">Client</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="montant" class="form-label">Montant</label>
+                                <input type="number" step="0.01" class="form-control" id="montant" name="montant" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="statut" class="form-label">Statut</label>
+                                <select class="form-select" id="statut" name="statut">
+                                    <option value="NON_PAYEE">NON_PAYEE</option>
+                                    <option value="PAYEE">PAYEE</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">Enregistrer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script th:src="@{/ressources/js/factures.js}" defer></script>
+</body>
+</html>
