@@ -13,7 +13,12 @@ public record ClientRequest(
     String ville,
     String codePostal,
     String pays,
+    String fonction,
     String typeClient,
+    Integer scorePropect,
+    String siteWeb,
+    String secteurActivite,
+    String notes,
     String origine,
     Long idUtilisateurResponsable
 ) {}

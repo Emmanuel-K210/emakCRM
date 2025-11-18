@@ -37,7 +37,6 @@ public class Client {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-
 	private String nom;
 	private String prenom;
 	private String entreprise;
@@ -64,7 +63,12 @@ public class Client {
 
 	@Enumerated(EnumType.STRING)
 	private OrigineClient origine;
-
+	private String notes;
+	@Column(name="site_web")
+	private String siteWeb;
+	private String fonction;
+	@Column(name="secteur_activite")
+	private String secteurActivite;
 	@ManyToOne
 	@JoinColumn(name = "id_utilisateur_responsable")
 	private Utilisateur utilisateurResponsable;

@@ -22,5 +22,9 @@ public record ClientResponse(
     String origine,
     Long idUtilisateurResponsable,
     String nomUtilisateurResponsable,
+    String fonction,
+    String siteWeb,
+    String secteurActivite,
+    String notes,
     LocalDateTime dateCreation
 ) {}

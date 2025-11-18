@@ -19,11 +19,15 @@ public class ClientMapper {
                 .adresse(request.adresse())
                 .ville(request.ville())
                 .codePostal(request.codePostal())
+                .notes(request.notes())
+                .secteurActivite(request.secteurActivite())
+                .siteWeb(request.siteWeb())
+                .fonction(request.fonction())
                 .pays(request.pays() != null ? request.pays() : "France")
-                .typeClient(TypeClient.valueOf(request.typeClient()))
+                .typeClient(request.typeClient() !=null? TypeClient.valueOf(request.typeClient()) : TypeClient.CLIENT)
                 .origine(request.origine() != null ? 
-                    OrigineClient.valueOf(request.origine()) : null)
-                .scoreProspect(1)
+                    OrigineClient.valueOf(request.origine()) : OrigineClient.AUTRE)
+                .scoreProspect(request.scorePropect())
                 .statut(StatutClient.ACTIF)
                 .build();
     }
@@ -49,6 +53,10 @@ public class ClientMapper {
                 .nomUtilisateurResponsable(client.getUtilisateurResponsable() != null ? 
                     client.getUtilisateurResponsable().getPrenom() + " " + client.getUtilisateurResponsable().getNom() : null)
                 .dateCreation(client.getDateCreation())
+                .notes(client.getNotes())
+                .fonction(client.getFonction())
+                .siteWeb(client.getSiteWeb())
+                .secteurActivite(client.getSecteurActivite())
                 .build();
     }
 }

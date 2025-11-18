@@ -6,7 +6,7 @@
 	
   <div class="card">
     <div class="card-body">
-      <form th:action="@{/clients/ajouter}" th:object="${client}" method="post" id="clientForm">
+      <form th:action="@{/clients/ajouter}" method="post" id="clientForm">
         
         <!-- INDICATEUR DE PROGRESSION -->
         <div class="progress mb-4" style="height: 6px;">
@@ -26,19 +26,19 @@
           <div class="row g-3">
             <div class="col-md-6">
               <label class="form-label fw-semibold">Nom *</label>
-              <input type="text" th:field="*{nom}" class="form-control" placeholder="Dupont" required>
+              <input type="text" name="nom" class="form-control" placeholder="Dupont" required>
             </div>
             <div class="col-md-6">
               <label class="form-label fw-semibold">Prénom *</label>
-              <input type="text" th:field="*{prenom}" class="form-control" placeholder="Jean" required>
+              <input type="text" name="prenom" class="form-control" placeholder="Jean" required>
             </div>
             <div class="col-md-6">
               <label class="form-label fw-semibold">Email *</label>
-              <input type="email" th:field="*{email}" class="form-control" placeholder="jean.dupont@email.com" required>
+              <input type="email" name="email" class="form-control" placeholder="jean.dupont@email.com" required>
             </div>
             <div class="col-md-6">
               <label class="form-label fw-semibold">Téléphone</label>
-              <input type="tel" th:field="*{telephone}" class="form-control" placeholder="01 23 45 67 89">
+              <input type="tel" name="telephone" class="form-control" placeholder="01 23 45 67 89">
             </div>
           </div>
         </div>
@@ -48,19 +48,19 @@
           <div class="row g-3">
             <div class="col-md-8">
               <label class="form-label fw-semibold">Entreprise</label>
-              <input type="text" th:field="*{entreprise}" class="form-control" placeholder="Nom de l'entreprise">
+              <input type="text" name="entreprise" class="form-control" placeholder="Nom de l'entreprise">
             </div>
             <div class="col-md-4">
               <label class="form-label fw-semibold">Fonction</label>
-              <input type="text" th:field="*{fonction}" class="form-control" placeholder="Directeur, Chef de projet...">
+              <input type="text" name="fonction" class="form-control" placeholder="Directeur, Chef de projet...">
             </div>
             <div class="col-md-6">
               <label class="form-label fw-semibold">Site web</label>
-              <input type="url" th:field="*{siteWeb}" class="form-control" placeholder="https://...">
+              <input type="url" name="siteWeb" class="form-control" placeholder="https://...">
             </div>
-            <div class="col-md-6">
+            <div class="col-md-3">
               <label class="form-label fw-semibold">Secteur d'activité</label>
-              <select th:field="*{secteur}" class="form-select">
+              <select name="secteurActivite" class="form-select">
                 <option value="">Sélectionner...</option>
                 <option value="IT">Informatique / Tech</option>
                 <option value="COMMERCE">Commerce</option>
@@ -70,6 +70,15 @@
                 <option value="AUTRE">Autre</option>
               </select>
             </div>
+            <div class="col-md-3">
+            <label class="form-label fw-semibold">Type de client</label>
+            <select name="typeClient" class="form-select">
+            	<option th:each="typeClient :${typeClients}"
+            	th:value ="${typeClient.name}"
+            	th:text="${typeClient.name}">	
+            	</option>
+            </select>
+            </div>
           </div>
         </div>
 
@@ -78,19 +87,19 @@
           <div class="row g-3">
             <div class="col-md-8">
               <label class="form-label fw-semibold">Adresse</label>
-              <input type="text" th:field="*{adresse}" class="form-control" placeholder="123 Avenue des Champs...">
+              <input type="text" name="adresse" class="form-control" placeholder="123 Avenue des Champs...">
             </div>
             <div class="col-md-4">
               <label class="form-label fw-semibold">Code postal</label>
-              <input type="text" th:field="*{codePostal}" class="form-control" placeholder="75001">
+              <input type="text" name="codePostal" class="form-control" placeholder="75001">
             </div>
             <div class="col-md-6">
               <label class="form-label fw-semibold">Ville</label>
-              <input type="text" th:field="*{ville}" class="form-control" placeholder="Paris">
+              <input type="text" name="ville" class="form-control" placeholder="Paris">
             </div>
             <div class="col-md-6">
               <label class="form-label fw-semibold">Pays</label>
-              <input type="text" th:field="*{pays}" class="form-control" placeholder="France" value="France">
+              <input type="text" name="pays" class="form-control" placeholder="France" value="France">
             </div>
           </div>
         </div>
@@ -100,7 +109,7 @@
           <div class="row g-3">
             <div class="col-md-6">
               <label class="form-label fw-semibold">Source du prospect</label>
-              <select th:field="*{origine}" class="form-select">
+              <select name="origine" class="form-select">
                 <option value="RECOMMANDATION">Recommandation</option>
                 <option value="SITE_WEB">Site web</option>
                 <option value="RESEAUX_SOCIAUX">Réseaux sociaux</option>
@@ -112,14 +121,14 @@
             <div class="col-md-6">
               <label class="form-label fw-semibold">Score de prospection</label>
               <div class="d-flex align-items-center gap-3">
-                <input type="range" th:field="*{scoreProspect}" class="form-range" min="1" max="10" value="5" 
+                <input type="range" name="scoreProspect" class="form-range" min="1" max="10" value="5" 
                        oninput="document.getElementById('scoreDisplay').textContent = this.value">
                 <span id="scoreDisplay" class="badge bg-primary">5</span>
               </div>
             </div>
             <div class="col-12">
               <label class="form-label fw-semibold">Notes</label>
-              <textarea th:field="*{notes}" class="form-control" rows="3" 
+              <textarea name="notes" class="form-control" rows="3" 
                         placeholder="Informations complémentaires..."></textarea>
             </div>
           </div>
