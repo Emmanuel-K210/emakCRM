@@ -78,4 +78,8 @@ public interface ClientRepository extends JpaRepository<Client, Long>,JpaSpecifi
 	            LocalDateTime endDate
 	        );
 	    long countByDateCreationBetween(LocalDateTime debut, LocalDateTime fin);
+
+		Long countByDateCreationAfter(LocalDateTime minusDays);
+
+		Long countByStatut(StatutClient actif);
 }

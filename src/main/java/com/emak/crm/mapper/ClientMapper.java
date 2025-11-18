@@ -27,7 +27,7 @@ public class ClientMapper {
                 .typeClient(request.typeClient() !=null? TypeClient.valueOf(request.typeClient()) : TypeClient.CLIENT)
                 .origine(request.origine() != null ? 
                     OrigineClient.valueOf(request.origine()) : OrigineClient.AUTRE)
-                .scoreProspect(request.scorePropect())
+                .scoreProspect(request.scoreProspect())
                 .statut(StatutClient.ACTIF)
                 .build();
     }

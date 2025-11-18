@@ -1,5 +1,6 @@
 package com.emak.crm.service.impl;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -17,11 +18,13 @@ import com.emak.crm.dto.ClientRequest;
 import com.emak.crm.dto.ClientResponse;
 import com.emak.crm.dto.ClientSearchRequest;
 import com.emak.crm.dto.ClientSearchResponse;
+import com.emak.crm.dto.OpportuniteResponse;
 import com.emak.crm.entity.Client;
 import com.emak.crm.enums.StatutClient;
 import com.emak.crm.enums.TypeClient;
 import com.emak.crm.exception.EntityNotFound;
 import com.emak.crm.mapper.ClientMapper;
+import com.emak.crm.mapper.OpportuniteMapper;
 import com.emak.crm.repository.ClientRepository;
 import com.emak.crm.service.ClientService;
 
@@ -309,5 +312,67 @@ public class ClientServiceImpl implements ClientService {
 				.map(ClientMapper::toResponse)
 				.toList();
 	}
+	
+	@Override
+	public Page<Client> findClientsWithFilters(String search, String statut, String type, String sort, Pageable pageable) {
+	        Specification<Client> spec = Specification.where(null);
+	        
+	        if (search != null && !search.trim().isEmpty()) {
+	            spec = spec.and((root, query, cb) -> 
+	                cb.or(
+	                    cb.like(cb.lower(root.get("nom")), "%" + search.toLowerCase() + "%"),
+	                    cb.like(cb.lower(root.get("prenom")), "%" + search.toLowerCase() + "%"),
+	                    cb.like(cb.lower(root.get("email")), "%" + search.toLowerCase() + "%"),
+	                    cb.like(cb.lower(root.get("entreprise")), "%" + search.toLowerCase() + "%")
+	                )
+	            );
+	        }
+	        
+	        if (statut != null && !statut.isEmpty()) {
+	            spec = spec.and((root, query, cb) -> 
+	                cb.equal(root.get("statut"), StatutClient.valueOf(statut))
+	            );
+	        }
+	        
+	        if (type != null && !type.isEmpty()) {
+	            spec = spec.and((root, query, cb) -> 
+	                cb.equal(root.get("typeClient"), TypeClient.valueOf(type))
+	            );
+	        }
+	        
+	        // Tri
+	        if ("nom".equals(sort)) {
+	            pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), 
+	                Sort.by("nom", "prenom"));
+	        } else if ("entreprise".equals(sort)) {
+	            pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), 
+	                Sort.by("entreprise"));
+	        } else if ("score".equals(sort)) {
+	            pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), 
+	                Sort.by("scoreProspect").descending());
+	        } else {
+	            pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), 
+	                Sort.by("dateCreation").descending());
+	        }
+	        
+	        return clientRepository.findAll(spec, pageable);
+	    }
+	    
+	    public Map<String, Long> getClientStats() {
+	        Map<String, Long> stats = new HashMap<>();
+	        stats.put("totalClients", clientRepository.count());
+	        stats.put("clientsActifs", clientRepository.countByStatut(StatutClient.ACTIF));
+	        stats.put("prospects", clientRepository.countByStatut(StatutClient.INACTIF));
+	        stats.put("nouveauxClients", clientRepository.countByDateCreationAfter(LocalDateTime.now().minusDays(7)));
+	        return stats;
+	    }
+
+		@Override
+		public List<OpportuniteResponse> findOpportuniteesByClientId(Long id) throws EntityNotFound {
+			var client = getById(id);
+			return client.getOpportunitees().stream()
+					.map(OpportuniteMapper::toResponse)
+					.toList();
+		}	
 
 }

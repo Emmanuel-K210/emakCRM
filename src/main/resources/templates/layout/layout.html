@@ -192,7 +192,12 @@ function confirmDelete(url) {
 	<script th:src="@{/ressources/js/app.min.js}"></script>
 	<script th:src="@{/ressources/libs/apexcharts/dist/apexcharts.min.js}"></script>
 	<script th:src="@{/ressources/libs/simplebar/dist/simplebar.js}"></script>
-
+<!-- Pour les scripts spécifiques -->
+	<div layout:fragment="scripts">
+	    <script>
+	        // Vos scripts spécifiques à la page
+	    </script>
+	</div>
 </body>
 
 </html>

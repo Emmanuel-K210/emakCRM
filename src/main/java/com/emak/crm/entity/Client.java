@@ -1,6 +1,8 @@
 package com.emak.crm.entity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.emak.crm.enums.OrigineClient;
 import com.emak.crm.enums.StatutClient;
@@ -10,11 +12,13 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -78,5 +82,7 @@ public class Client {
 	@Builder.Default
 	@Column(name="date_modification")
 	private LocalDateTime dateModification = LocalDateTime.now();
-
+	
+	@OneToMany(fetch = FetchType.LAZY)
+	private final List<Opportunite> opportunitees = new ArrayList<>();
 }

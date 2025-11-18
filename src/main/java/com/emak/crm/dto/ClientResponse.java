@@ -26,5 +26,6 @@ public record ClientResponse(
     String siteWeb,
     String secteurActivite,
     String notes,
-    LocalDateTime dateCreation
+    LocalDateTime dateCreation,
+    LocalDateTime dateModification
 ) {}

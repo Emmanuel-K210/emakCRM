@@ -18,7 +18,12 @@
             <i class="ti ti-user-plus me-2"></i>Nouveau Client
             <small class="text-muted" id="stepTitle">- Informations de base</small>
           </h5>
-          <span class="badge bg-primary" id="stepIndicator">Étape 1/4</span>
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-primary" id="stepIndicator">Étape 1/4</span>
+            <span id="draftBadge" class="badge bg-warning text-dark" style="display: none;">
+              <i class="ti ti-device-floppy me-1"></i>Brouillon
+            </span>
+          </div>
         </div>
 
         <!-- ÉTAPE 1: INFORMATIONS DE BASE -->
@@ -121,7 +126,7 @@
             <div class="col-md-6">
               <label class="form-label fw-semibold">Score de prospection</label>
               <div class="d-flex align-items-center gap-3">
-                <input type="range" name="scoreProspect" class="form-range" min="1" max="10" value="5" 
+                <input type="range" name="scorePropect " class="form-range" min="1" max="10" value="5" 
                        oninput="document.getElementById('scoreDisplay').textContent = this.value">
                 <span id="scoreDisplay" class="badge bg-primary">5</span>
               </div>
@@ -136,19 +141,304 @@
 
         <!-- BOUTONS DE NAVIGATION -->
         <div class="mt-4 pt-3 border-top d-flex justify-content-between">
-          <button type="button" id="prevBtn" class="btn btn-outline-secondary" onclick="prevStep()" style="display: none;">
-            <i class="ti ti-arrow-left me-2"></i>Précédent
-          </button>
-          <button type="button" id="nextBtn" class="btn btn-primary ms-auto" onclick="nextStep()">
-            Suivant <i class="ti ti-arrow-right ms-2"></i>
-          </button>
-          <button type="submit" id="submitBtn" class="btn btn-success" style="display: none;">
-            <i class="ti ti-check me-2"></i>Créer le client
-          </button>
+          <div>
+            <button type="button" id="clearDraftBtn" class="btn btn-outline-danger me-2" onclick="clearDraft()" style="display: none;">
+              <i class="ti ti-trash me-2"></i>Effacer le brouillon
+            </button>
+            <button type="button" id="prevBtn" class="btn btn-outline-secondary" onclick="prevStep()" style="display: none;">
+              <i class="ti ti-arrow-left me-2"></i>Précédent
+            </button>
+          </div>
+          <div>
+            <button type="button" id="nextBtn" class="btn btn-primary ms-auto" onclick="nextStep()">
+              Suivant <i class="ti ti-arrow-right ms-2"></i>
+            </button>
+            <button type="submit" id="submitBtn" class="btn btn-success" style="display: none;">
+              <i class="ti ti-check me-2"></i>Créer le client
+            </button>
+          </div>
         </div>
 
       </form>
     </div>
   </div>
+
+  <!-- Script JavaScript -->
+  <script th:inline="javascript">
+  /*<![CDATA[*/
+  let currentStep = 1;
+  const totalSteps = 4;
+  const DRAFT_KEY = 'clientFormDraft';
+  let autoSaveTimeout = null;
+
+  function updateProgress() {
+      const progress = (currentStep / totalSteps) * 100;
+      document.getElementById('progressBar').style.width = progress + '%';
+      
+      document.getElementById('stepIndicator').textContent = `Étape ${currentStep}/${totalSteps}`;
+      
+      const stepTitles = {
+          1: '- Informations de base',
+          2: '- Entreprise', 
+          3: '- Localisation',
+          4: '- Informations supplémentaires'
+      };
+      document.getElementById('stepTitle').textContent = stepTitles[currentStep];
+  }
+
+  function showStep(step) {
+      for (let i = 1; i <= totalSteps; i++) {
+          document.getElementById('step' + i).style.display = 'none';
+      }
+      
+      document.getElementById('step' + step).style.display = 'block';
+      
+      document.getElementById('prevBtn').style.display = step > 1 ? 'block' : 'none';
+      document.getElementById('nextBtn').style.display = step < totalSteps ? 'block' : 'none';
+      document.getElementById('submitBtn').style.display = step === totalSteps ? 'block' : 'none';
+      
+      updateProgress();
+      checkDraftStatus();
+  }
+
+  function nextStep() {
+      if (currentStep < totalSteps && validateStep(currentStep)) {
+          currentStep++;
+          showStep(currentStep);
+          autoSave(); // Sauvegarder à chaque étape
+      }
+  }
+
+  function prevStep() {
+      if (currentStep > 1) {
+          currentStep--;
+          showStep(currentStep);
+      }
+  }
+
+  function validateStep(step) {
+      const stepElement = document.getElementById('step' + step);
+      const requiredInputs = stepElement.querySelectorAll('input[required]');
+      
+      for (let input of requiredInputs) {
+          if (!input.value.trim()) {
+              input.focus();
+              showToast('Veuillez remplir tous les champs obligatoires', 'warning');
+              return false;
+          }
+          
+          if (input.type === 'email' && input.value.trim()) {
+              const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+              if (!emailRegex.test(input.value)) {
+                  input.focus();
+                  showToast('Veuillez saisir une adresse email valide', 'warning');
+                  return false;
+              }
+          }
+      }
+      
+      return true;
+  }
+
+  // === GESTION DU LOCALSTORAGE ===
+
+  function autoSave() {
+      // Annuler la sauvegarde précédente si elle n'a pas encore été exécutée
+      if (autoSaveTimeout) {
+          clearTimeout(autoSaveTimeout);
+      }
+      
+      // Délai pour éviter de sauvegarder à chaque frappe
+      autoSaveTimeout = setTimeout(() => {
+          const formData = new FormData(document.getElementById('clientForm'));
+          const data = {
+              formData: Object.fromEntries(formData),
+              currentStep: currentStep,
+              lastSaved: new Date().toISOString()
+          };
+          
+          localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
+          console.log('Brouillon sauvegardé');
+          
+          // Mettre à jour le badge
+          checkDraftStatus();
+      }, 1000);
+  }
+
+  function restoreDraft() {
+      const saved = localStorage.getItem(DRAFT_KEY);
+      if (saved) {
+          try {
+              const data = JSON.parse(saved);
+              
+              // Restaurer les données du formulaire
+              Object.keys(data.formData).forEach(key => {
+                  const input = document.querySelector(`[name="${key}"]`);
+                  if (input) {
+                      input.value = data.formData[key];
+                  }
+              });
+              
+              // Restaurer l'étape
+              if (data.currentStep && data.currentStep > 1) {
+                  currentStep = data.currentStep;
+                  showStep(currentStep);
+              }
+              
+              // Restaurer l'affichage du score
+              const scoreInput = document.querySelector('input[name="scoreProspect"]');
+              if (scoreInput && data.formData.scoreProspect) {
+                  document.getElementById('scoreDisplay').textContent = data.formData.scoreProspect;
+              }
+              
+              showToast('Brouillon restauré avec succès', 'success');
+              
+          } catch (error) {
+              console.error('Erreur lors de la restauration du brouillon:', error);
+              clearDraft();
+          }
+      }
+  }
+
+  function clearDraft() {
+      localStorage.removeItem(DRAFT_KEY);
+      document.getElementById('clientForm').reset();
+      
+      // Réinitialiser à l'étape 1
+      currentStep = 1;
+      showStep(currentStep);
+      
+      // Cacher le badge
+      document.getElementById('draftBadge').style.display = 'none';
+      document.getElementById('clearDraftBtn').style.display = 'none';
+      
+      showToast('Brouillon effacé', 'info');
+  }
+
+  function checkDraftStatus() {
+      const saved = localStorage.getItem(DRAFT_KEY);
+      const hasDraft = saved !== null;
+      
+      document.getElementById('draftBadge').style.display = hasDraft ? 'inline-block' : 'none';
+      document.getElementById('clearDraftBtn').style.display = hasDraft ? 'block' : 'none';
+      
+      if (hasDraft) {
+          try {
+              const data = JSON.parse(saved);
+              const lastSaved = new Date(data.lastSaved).toLocaleString('fr-FR');
+              document.getElementById('draftBadge').title = `Dernière sauvegarde: ${lastSaved}`;
+          } catch (error) {
+              console.error('Erreur lecture brouillon:', error);
+          }
+      }
+  }
+
+  function showToast(message, type = 'info') {
+      // Créer un toast Bootstrap (suppose que Bootstrap est inclus)
+      const toastContainer = document.getElementById('toastContainer') || createToastContainer();
+      const toastId = 'toast-' + Date.now();
+      
+      const toastHTML = `
+      <div id="${toastId}" class="toast align-items-center text-bg-${type} border-0" role="alert">
+          <div class="d-flex">
+              <div class="toast-body">
+                  <i class="ti ${getToastIcon(type)} me-2"></i>
+                  ${message}
+              </div>
+              <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+          </div>
+      </div>
+      `;
+      
+      toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+      
+      const toastElement = document.getElementById(toastId);
+      const toast = new bootstrap.Toast(toastElement, { delay: 4000 });
+      toast.show();
+      
+      // Nettoyer après fermeture
+      toastElement.addEventListener('hidden.bs.toast', () => {
+          toastElement.remove();
+      });
+  }
+
+  function getToastIcon(type) {
+      const icons = {
+          success: 'ti-circle-check',
+          warning: 'ti-alert-triangle',
+          error: 'ti-circle-x',
+          info: 'ti-info-circle'
+      };
+      return icons[type] || 'ti-info-circle';
+  }
+
+  function createToastContainer() {
+      const container = document.createElement('div');
+      container.id = 'toastContainer';
+      container.className = 'position-fixed top-0 end-0 p-3';
+      container.style.zIndex = '1055';
+      document.body.appendChild(container);
+      return container;
+  }
+
+  // Initialisation
+  document.addEventListener('DOMContentLoaded', function() {
+      showStep(currentStep);
+      
+      // Restaurer le brouillon au chargement
+      restoreDraft();
+      
+      // Écouter les changements pour auto-sauvegarde
+      const formInputs = document.querySelectorAll('#clientForm input, #clientForm select, #clientForm textarea');
+      formInputs.forEach(input => {
+          input.addEventListener('input', autoSave);
+          input.addEventListener('change', autoSave);
+      });
+      
+      // Soumission du formulaire
+      document.getElementById('clientForm').addEventListener('submit', function(e) {
+          if (!validateStep(currentStep)) {
+              e.preventDefault();
+              return false;
+          }
+          
+          // Désactiver le bouton et afficher le chargement
+          const submitBtn = document.getElementById('submitBtn');
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<i class="ti ti-loader me-2"></i>Création en cours...';
+          
+          // Effacer le brouillon après soumission réussie
+         //clearDraft();
+      });
+      
+      // Auto-format du téléphone
+      const phoneInput = document.querySelector('input[name="telephone"]');
+      if (phoneInput) {
+          phoneInput.addEventListener('input', function(e) {
+              let value = e.target.value.replace(/\D/g, '');
+              if (value.length > 0) {
+                  if (value.length <= 2) {
+                      value = value;
+                  } else if (value.length <= 4) {
+                      value = value.slice(0, 2) + ' ' + value.slice(2);
+                  } else if (value.length <= 6) {
+                      value = value.slice(0, 2) + ' ' + value.slice(2, 4) + ' ' + value.slice(4);
+                  } else if (value.length <= 8) {
+                      value = value.slice(0, 2) + ' ' + value.slice(2, 4) + ' ' + value.slice(4, 6) + ' ' + value.slice(6);
+                  } else if (value.length <= 10) {
+                      value = value.slice(0, 2) + ' ' + value.slice(2, 4) + ' ' + value.slice(4, 6) + ' ' + value.slice(6, 8);
+                  }else{
+                      value = value.slice(0, 2) + ' ' + value.slice(2, 4) + ' ' + value.slice(4, 6) + ' ' + value.slice(6, 8)+' '+value.slice(8, 10);
+                  }
+              }
+              e.target.value = value;
+          });
+      }
+      
+      // Vérifier le statut du brouillon
+      checkDraftStatus();
+  });
+  /*]]>*/
+  </script>
 </div>
 </html>

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/layout"
+    layout:decorate="~{layout/layout}">
+
+<div layout:fragment="content">
+    <div class="container-fluid">
+        <!-- En-tête -->
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <div>
+                        <h4 class="card-title fw-semibold mb-1">
+                            <i class="ti ti-user-check text-success me-2"></i>
+                            Client créé avec succès !
+                        </h4>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb mb-0">
+                                <li class="breadcrumb-item"><a th:href="@{/index}">Dashboard</a></li>
+                                <li class="breadcrumb-item"><a th:href="@{/clients}">Clients</a></li>
+                                <li class="breadcrumb-item active">Création réussie</li>
+                            </ol>
+                        </nav>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a th:href="@{/clients/ajouter}" class="btn btn-primary">
+                            <i class="ti ti-user-plus me-2"></i>Nouveau Client
+                        </a>
+                        <a th:href="@{/clients}" class="btn btn-outline-secondary">
+                            <i class="ti ti-list me-2"></i>Liste des Clients
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Carte de félicitations -->
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-5 text-center">
+                        <!-- Animation de succès -->
+                        <div class="mb-4">
+                            <div class="success-animation mx-auto">
+                                <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52" width="80" height="80">
+                                    <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none" stroke="#28a745" stroke-width="3"/>
+                                    <path class="checkmark__check" fill="none" stroke="#28a745" stroke-width="4" stroke-linecap="round" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <h2 class="text-success mb-3">Félicitations !</h2>
+                        <p class="text-muted mb-4 fs-5">
+                            Le client <strong th:text="${client.nom + ' ' + client.prenom}">Jean Dupont</strong> 
+                            a été créé avec succès dans votre base de données.
+                        </p>
+
+                        <!-- Informations du client -->
+                        <div class="row justify-content-center mb-4">
+                            <div class="col-md-8">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6 class="card-title text-center mb-3">
+                                            <i class="ti ti-user-circle me-2"></i>Récapitulatif du client
+                                        </h6>
+                                        <div class="row text-start">
+                                            <div class="col-md-6">
+                                                <p class="mb-2"><strong>Nom :</strong> <span th:text="${client.nom}">Dupont</span></p>
+                                                <p class="mb-2"><strong>Prénom :</strong> <span th:text="${client.prenom}">Jean</span></p>
+                                                <p class="mb-2"><strong>Email :</strong> <span th:text="${client.email}">jean.dupont@email.com</span></p>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <p class="mb-2" th:if="${client.telephone}"><strong>Téléphone :</strong> <span th:text="${client.telephone}">01 23 45 67 89</span></p>
+                                                <p class="mb-2" th:if="${client.entreprise}"><strong>Entreprise :</strong> <span th:text="${client.entreprise}">Entreprise XYZ</span></p>
+                                                <p class="mb-2" th:if="${client.fonction}"><strong>Fonction :</strong> <span th:text="${client.fonction}">Directeur</span></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Actions rapides -->
+                        <div class="row g-3 justify-content-center">
+                            <div class="col-auto">
+                                <a th:href="@{/clients/{id}(id=${client.id})}" class="btn btn-primary">
+                                    <i class="ti ti-eye me-2"></i>Voir le profil
+                                </a>
+                            </div>
+                            <div class="col-auto">
+                                <a th:href="@{/clients/modifier/{id}(id=${client.id})}" class="btn btn-outline-primary">
+                                    <i class="ti ti-edit me-2"></i>Modifier
+                                </a>
+                            </div>
+                            <div class="col-auto">
+                                <a th:href="@{/devis/nouveau?clientId={id}(id=${client.id})}" class="btn btn-success">
+                                    <i class="ti ti-file-invoice me-2"></i>Créer un devis
+                                </a>
+                            </div>
+                            <div class="col-auto">
+                                <a th:href="@{/clients/ajouter}" class="btn btn-outline-success">
+                                    <i class="ti ti-user-plus me-2"></i>Ajouter un autre
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Statistiques rapides -->
+                        <div class="mt-5 pt-4 border-top">
+                            <div class="row g-4">
+                                <div class="col-md-4">
+                                    <div class="text-center">
+                                        <div class="bg-primary bg-opacity-10 rounded-circle p-3 d-inline-block mb-2">
+                                            <i class="ti ti-users text-primary fs-4"></i>
+                                        </div>
+                                        <h5 class="mb-1" th:text="${totalClients}">150</h5>
+                                        <p class="text-muted mb-0">Clients total</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="text-center">
+                                        <div class="bg-success bg-opacity-10 rounded-circle p-3 d-inline-block mb-2">
+                                            <i class="ti ti-file-invoice text-success fs-4"></i>
+                                        </div>
+                                        <h5 class="mb-1" th:text="${devisEnCours}">12</h5>
+                                        <p class="text-muted mb-0">Devis en cours</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="text-center">
+                                        <div class="bg-warning bg-opacity-10 rounded-circle p-3 d-inline-block mb-2">
+                                            <i class="ti ti-chart-bar text-warning fs-4"></i>
+                                        </div>
+                                        <h5 class="mb-1" th:text="${tauxConversion} + '%'">85%</h5>
+                                        <p class="text-muted mb-0">Taux de conversion</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Suggestions d'actions -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header bg-transparent">
+                                <h6 class="card-title mb-0">
+                                    <i class="ti ti-bulb me-2"></i>Prochaines étapes suggérées
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <div class="d-flex align-items-start p-3 border rounded">
+                                            <i class="ti ti-mail text-primary fs-5 me-3 mt-1"></i>
+                                            <div>
+                                                <h6 class="mb-1">Envoyer un email de bienvenue</h6>
+                                                <p class="text-muted mb-0 small">Personnalisez le message pour créer un lien.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="d-flex align-items-start p-3 border rounded">
+                                            <i class="ti ti-phone text-success fs-5 me-3 mt-1"></i>
+                                            <div>
+                                                <h6 class="mb-1">Planifier un appel de suivi</h6>
+                                                <p class="text-muted mb-0 small">Prenez contact sous 48h pour consolider la relation.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="d-flex align-items-start p-3 border rounded">
+                                            <i class="ti ti-checklist text-warning fs-5 me-3 mt-1"></i>
+                                            <div>
+                                                <h6 class="mb-1">Ajouter à une campagne</h6>
+                                                <p class="text-muted mb-0 small">Intégrez-le dans votre flux de nurturing.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div layout:fragment="scripts">
+    <style>
+        /* Animation de succès */
+        .success-animation {
+            margin: 0 auto;
+        }
+
+        .checkmark {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: block;
+            stroke-width: 3;
+            stroke: #4bb543;
+            stroke-miterlimit: 10;
+            animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+        }
+
+        .checkmark__circle {
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            stroke-width: 3;
+            stroke-miterlimit: 10;
+            stroke: #4bb543;
+            fill: none;
+            animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+
+        .checkmark__check {
+            transform-origin: 50% 50%;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+        }
+
+        @keyframes stroke {
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        @keyframes scale {
+            0%, 100% {
+                transform: none;
+            }
+            50% {
+                transform: scale3d(1.1, 1.1, 1);
+            }
+        }
+
+        @keyframes fill {
+            100% {
+                box-shadow: inset 0px 0px 0px 30px #4bb543;
+            }
+        }
+
+        /* Effet de pulse sur les boutons d'action */
+        .btn-primary, .btn-success {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(13, 110, 253, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(13, 110, 253, 0);
+            }
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-redirection après 30 secondes d'inactivité
+            let inactivityTime = function () {
+                let time;
+                window.onload = resetTimer;
+                document.onmousemove = resetTimer;
+                document.onkeypress = resetTimer;
+
+                function redirect() {
+                    window.location.href = '/clients';
+                }
+
+                function resetTimer() {
+                    clearTimeout(time);
+                    time = setTimeout(redirect, 30000); // 30 secondes
+                }
+            };
+            inactivityTime();
+
+            // Confettis pour célébrer la création
+            setTimeout(() => {
+                createConfetti();
+            }, 1000);
+        });
+
+        function createConfetti() {
+            const confettiCount = 100;
+            const confettiContainer = document.createElement('div');
+            confettiContainer.style.position = 'fixed';
+            confettiContainer.style.top = '0';
+            confettiContainer.style.left = '0';
+            confettiContainer.style.width = '100%';
+            confettiContainer.style.height = '100%';
+            confettiContainer.style.pointerEvents = 'none';
+            confettiContainer.style.zIndex = '9999';
+            document.body.appendChild(confettiContainer);
+
+            for (let i = 0; i < confettiCount; i++) {
+                const confetti = document.createElement('div');
+                confetti.style.position = 'absolute';
+                confetti.style.width = '10px';
+                confetti.style.height = '10px';
+                confetti.style.backgroundColor = getRandomColor();
+                confetti.style.borderRadius = '50%';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.animation = `fall ${Math.random() * 3 + 2}s linear forwards`;
+                
+                confettiContainer.appendChild(confetti);
+                
+                // Supprimer après l'animation
+                setTimeout(() => {
+                    confetti.remove();
+                }, 5000);
+            }
+
+            // Supprimer le container après l'animation
+            setTimeout(() => {
+                confettiContainer.remove();
+            }, 5000);
+        }
+
+        function getRandomColor() {
+            const colors = ['#28a745', '#17a2b8', '#ffc107', '#dc3545', '#007bff', '#6f42c1'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        // Ajouter l'animation CSS pour la chute des confettis
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fall {
+                0% {
+                    transform: translateY(-100px) rotate(0deg);
+                    opacity: 1;
+                }
+                100% {
+                    transform: translateY(100vh) rotate(360deg);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</div>
+</html>
