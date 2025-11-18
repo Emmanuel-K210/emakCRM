@@ -71,16 +71,16 @@
 								</tr>
 							</thead>
 							<tbody>
-								<tr>
-									<td>Site E-commerce</td>
-									<td>€25,000</td>
-									<td><span class="badge bg-warning">Négociation</span></td>
+								<tr th:each="opp:${opportunitees}">
+									<td th:text="${opp.nomOpportunite}">Site E-commerce</td>
+									<td th:text="${opp.montantEstime}">€25,000</td>
+									<td th:text="${opp.etapeVente}"><span class="badge bg-warning">Négociation</span></td>
 									<td>
 										<div class="progress" style="height: 8px;">
-											<div class="progress-bar bg-warning" style="width: 70%"></div>
-										</div> <small>70%</small>
+											<div class="progress-bar bg-warning" th:style="'width:'+${opp.probabilite}+'%'"></div>
+										</div> <small th:text="${probabilite*10}">70%</small>
 									</td>
-									<td>15/12/2024</td>
+									<td th:text="${opp.dateCloturePrevue}">15/12/2024</td>
 								</tr>
 							</tbody>
 						</table>

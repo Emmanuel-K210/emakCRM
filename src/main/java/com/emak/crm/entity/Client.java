@@ -83,6 +83,6 @@ public class Client {
 	@Column(name="date_modification")
 	private LocalDateTime dateModification = LocalDateTime.now();
 	
-	@OneToMany(fetch = FetchType.LAZY)
+	@OneToMany(fetch = FetchType.LAZY,mappedBy = "client")
 	private final List<Opportunite> opportunitees = new ArrayList<>();
 }
