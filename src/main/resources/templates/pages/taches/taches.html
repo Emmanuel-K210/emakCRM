@@ -2,8 +2,14 @@
 <html lang="fr" xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/layout"
     layout:decorate="layout/layout">
+    
+<head>
+    <!-- CSS pour FullCalendar -->
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+</head>
  
- <div layout:fragment="content">
+<div layout:fragment="content">
   <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Gestion des Tâches</h1>
     <div class="btn-toolbar mb-2 mb-md-0">
@@ -11,186 +17,422 @@
             <i class="fas fa-plus me-1"></i>Nouvelle Tâche
         </button>
     </div>
-</div>
+  </div>
 
-<!-- Filtres et Vue -->
-<div class="row mb-4">
-    <div class="col-md-3">
-        <select class="form-select" id="viewSelect">
-            <option value="list">Vue Liste</option>
+  <!-- Alertes et Messages -->
+  <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show">
+    <span th:text="${param.success}">Tâche créée avec succès!</span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+
+  <!-- Barre d'outils d'export -->
+  <div class="btn-toolbar mb-3" role="toolbar">
+    <div class="btn-group me-2">
+        <button type="button" class="btn btn-outline-success" id="exportPdf">
+            <i class="fas fa-file-pdf me-1"></i>PDF
+        </button>
+        <button type="button" class="btn btn-outline-success" id="exportExcel">
+            <i class="fas fa-file-excel me-1"></i>Excel
+        </button>
+        <button type="button" class="btn btn-outline-success" id="exportCsv">
+            <i class="fas fa-file-csv me-1"></i>CSV
+        </button>
+    </div>
+    <div class="btn-group me-2">
+        <button type="button" class="btn btn-outline-info" id="enableNotifications">
+            <i class="fas fa-bell me-1"></i>Notifications
+        </button>
+    </div>
+  </div>
+
+  <!-- Filtres -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-3">
+          <label class="form-label">Vue</label>
+          <select class="form-select" id="viewSelect">
             <option value="kanban">Vue Kanban</option>
+            <option value="list">Vue Liste</option>
             <option value="calendar">Vue Calendrier</option>
-        </select>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Priorité</label>
+          <select class="form-select" id="priorityFilter">
+            <option value="">Toutes</option>
+            <option value="HAUTE">Haute</option>
+            <option value="MOYENNE">Moyenne</option>
+            <option value="BASSE">Basse</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Statut</label>
+          <select class="form-select" id="statusFilter">
+            <option value="">Tous</option>
+            <option value="A_FAIRE">À faire</option>
+            <option value="EN_COURS">En cours</option>
+            <option value="TERMINE">Terminé</option>
+            <option value="ANNULE">Annulé</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Date d'échéance</label>
+          <input type="date" class="form-control" id="dateFilter">
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+          <button class="btn btn-outline-secondary w-100" id="resetFilters">
+            <i class="fas fa-refresh me-1"></i>Réinitialiser
+          </button>
+        </div>
+      </div>
     </div>
-    <div class="col-md-2">
-        <select class="form-select">
-            <option>Toutes les priorités</option>
-            <option>Haute</option>
-            <option>Moyenne</option>
-            <option>Basse</option>
-        </select>
-    </div>
-    <div class="col-md-2">
-        <select class="form-select">
-            <option>Tous les statuts</option>
-            <option>À faire</option>
-            <option>En cours</option>
-            <option>Terminé</option>
-        </select>
-    </div>
-    <div class="col-md-3">
-        <input type="date" class="form-control" placeholder="Filtrer par date">
-    </div>
-</div>
+  </div>
 
-<!-- Vue Kanban -->
-<div id="kanbanView">
+  <!-- Vue Kanban -->
+  <div id="kanbanView">
     <div class="row">
-        <!-- Colonne À Faire -->
-        <div class="col-lg-3 mb-4">
-            <div class="card border-primary">
-                <div class="card-header bg-primary text-white">
-                    <h6 class="mb-0">À Faire <span class="badge bg-light text-dark">3</span></h6>
-                </div>
-                <div class="card-body kanban-column" data-status="todo">
-                    <div class="card task-card mb-3">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h6 class="card-title mb-0">Préparer réunion client</h6>
-                                <span class="badge bg-danger">Haute</span>
-                            </div>
-                            <p class="card-text small">Réunion avec ABC Corp pour le projet site e-commerce</p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <small class="text-muted">
-                                    <i class="fas fa-clock me-1"></i>Aujourd'hui, 15:00
-                                </small>
-                                <span class="badge bg-secondary">Client</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      <!-- Colonne À Faire -->
+      <div class="col-lg-3 mb-4">
+        <div class="card border-primary">
+          <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h6 class="mb-0">À Faire</h6>
+            <span class="badge bg-light text-dark" id="todoCount">0</span>
+          </div>
+          <div class="card-body kanban-column" data-status="A_FAIRE" style="min-height: 500px;">
+            <!-- Tâches dynamiques via JavaScript -->
+          </div>
         </div>
+      </div>
 
-        <!-- Colonne En Cours -->
-        <div class="col-lg-3 mb-4">
-            <div class="card border-warning">
-                <div class="card-header bg-warning text-dark">
-                    <h6 class="mb-0">En Cours <span class="badge bg-light text-dark">2</span></h6>
-                </div>
-                <div class="card-body kanban-column" data-status="inprogress">
-                    <div class="card task-card mb-3">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h6 class="card-title mb-0">Rédiger proposition</h6>
-                                <span class="badge bg-warning">Moyenne</span>
-                            </div>
-                            <p class="card-text small">Proposition commerciale pour XYZ Startup</p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <small class="text-muted">
-                                    <i class="fas fa-user me-1"></i>Marie L.
-                                </small>
-                                <span class="badge bg-info">Opportunité</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      <!-- Colonne En Cours -->
+      <div class="col-lg-3 mb-4">
+        <div class="card border-warning">
+          <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+            <h6 class="mb-0">En Cours</h6>
+            <span class="badge bg-light text-dark" id="inprogressCount">0</span>
+          </div>
+          <div class="card-body kanban-column" data-status="EN_COURS" style="min-height: 500px;">
+            <!-- Tâches dynamiques via JavaScript -->
+          </div>
         </div>
+      </div>
 
-        <!-- Colonne En Revue -->
-        <div class="col-lg-3 mb-4">
-            <div class="card border-info">
-                <div class="card-header bg-info text-white">
-                    <h6 class="mb-0">En Revue <span class="badge bg-light text-dark">1</span></h6>
-                </div>
-                <div class="card-body kanban-column" data-status="review">
-                    <!-- Tâches en revue -->
-                </div>
-            </div>
+      <!-- Colonne Terminé -->
+      <div class="col-lg-3 mb-4">
+        <div class="card border-success">
+          <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+            <h6 class="mb-0">Terminé</h6>
+            <span class="badge bg-light text-dark" id="doneCount">0</span>
+          </div>
+          <div class="card-body kanban-column" data-status="TERMINE" style="min-height: 500px;">
+            <!-- Tâches dynamiques via JavaScript -->
+          </div>
         </div>
+      </div>
 
-        <!-- Colonne Terminé -->
-        <div class="col-lg-3 mb-4">
-            <div class="card border-success">
-                <div class="card-header bg-success text-white">
-                    <h6 class="mb-0">Terminé <span class="badge bg-light text-dark">4</span></h6>
-                </div>
-                <div class="card-body kanban-column" data-status="done">
-                    <div class="card task-card mb-3">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h6 class="card-title mb-0">Envoyer devis</h6>
-                                <span class="badge bg-success">Terminé</span>
-                            </div>
-                            <p class="card-text small">Devis pour maintenance site web</p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <small class="text-muted">
-                                    <i class="fas fa-check me-1"></i>Terminé
-                                </small>
-                                <span class="badge bg-secondary">Devis</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+      <!-- Colonne Annulé -->
+      <div class="col-lg-3 mb-4">
+        <div class="card border-secondary">
+          <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+            <h6 class="mb-0">Annulé</h6>
+            <span class="badge bg-light text-dark" id="cancelledCount">0</span>
+          </div>
+          <div class="card-body kanban-column" data-status="ANNULE" style="min-height: 500px;">
+            <!-- Tâches dynamiques via JavaScript -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vue Calendrier (cachée par défaut) -->
+  <div id="calendarView" class="d-none">
+    <div class="card">
+        <div class="card-body">
+            <div id="calendar"></div>
+        </div>
+    </div>
+  </div>
+
+  <!-- Vue Liste (cachée par défaut) -->
+  <div id="listView" class="d-none">
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="tasksTable" class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Titre</th>
+                            <th>Priorité</th>
+                            <th>Statut</th>
+                            <th>Assigné à</th>
+                            <th>Date d'échéance</th>
+                            <th>Client</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Rempli dynamiquement -->
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
+  </div>
+
+  <!-- Modal Nouvelle Tâche -->
+  <div class="modal fade" id="addTaskModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Nouvelle Tâche</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="taskForm">
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">Titre *</label>
+                  <input type="text" class="form-control" name="titre" required>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">Priorité *</label>
+                  <select class="form-select" name="priorite" required>
+                    <option value="">Choisir...</option>
+                    <option value="HAUTE">Haute</option>
+                    <option value="MOYENNE">Moyenne</option>
+                    <option value="BASSE">Basse</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">Description</label>
+              <textarea class="form-control" name="description" rows="3"></textarea>
+            </div>
+            
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">Date de début</label>
+                  <input type="datetime-local" class="form-control" name="dateDebut">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">Date d'échéance</label>
+                  <input type="datetime-local" class="form-control" name="dateEcheance">
+                </div>
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">Assigné à *</label>
+                  <select class="form-select" name="idUtilisateur" required>
+                    <option value="">Choisir un utilisateur...</option>
+                    <!-- Dynamique via API -->
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">Client</label>
+                  <select class="form-select" name="idClient">
+                    <option value="">Choisir un client...</option>
+                    <!-- Dynamique via API -->
+                  </select>
+                </div>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">Opportunité</label>
+              <select class="form-select" name="idOpportunite">
+                <option value="">Choisir une opportunité...</option>
+                <!-- Dynamique via API -->
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+            <button type="submit" class="btn btn-primary">Créer la tâche</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>
 
-<!-- Modal Nouvelle Tâche -->
-<div class="modal fade" id="addTaskModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Nouvelle Tâche</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form>
-                    <div class="mb-3">
-                        <label class="form-label">Titre</label>
-                        <input type="text" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Description</label>
-                        <textarea class="form-control" rows="3"></textarea>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Priorité</label>
-                                <select class="form-select">
-                                    <option>Haute</option>
-                                    <option>Moyenne</option>
-                                    <option>Basse</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Date d'échéance</label>
-                                <input type="date" class="form-control">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Assigné à</label>
-                        <select class="form-select">
-                            <option>Marie Lambert</option>
-                            <option>Pierre Dubois</option>
-                            <option>Sophie Martin</option>
-                        </select>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                <button type="button" class="btn btn-primary">Créer la tâche</button>
-            </div>
-        </div>
-    </div>
+<div layout:fragment="scripts">
+	 <!-- WebSocket -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    
+  <!-- Dépendances JavaScript -->
+  <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+  <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/fr.min.js'></script>
+  
+  <!-- Export PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+  
+  <!-- Export Excel -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  
+  <!-- WebSocket -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+  
+  <!-- DataTables (optionnel) -->
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+
+  <!-- Notre script principal -->
+  <script th:src="@{/js/taches.js}"></script>
+
+  <style>
+    /* Styles pour le Kanban */
+    .kanban-column {
+        min-height: 500px;
+        transition: all 0.3s ease;
+    }
+
+    .kanban-column.drag-over {
+        background-color: rgba(0, 123, 255, 0.1);
+        border: 2px dashed #007bff;
+    }
+
+    .task-card {
+        cursor: grab;
+        transition: all 0.2s ease;
+        border-left: 4px solid #dee2e6;
+    }
+
+    .task-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .task-card.dragging {
+        opacity: 0.5;
+        transform: rotate(5deg);
+    }
+
+    .task-card.border-danger {
+        border-left-color: #dc3545;
+    }
+
+    .task-card.border-warning {
+        border-left-color: #ffc107;
+    }
+
+    .task-card.border-success {
+        border-left-color: #198754;
+    }
+
+    /* Priorités */
+    .priority-high {
+        border-left-color: #dc3545;
+    }
+
+    .priority-medium {
+        border-left-color: #ffc107;
+    }
+
+    .priority-low {
+        border-left-color: #198754;
+    }
+
+    /* Statuts */
+    .status-todo .card-header {
+        background-color: #0d6efd !important;
+    }
+
+    .status-inprogress .card-header {
+        background-color: #ffc107 !important;
+        color: #000 !important;
+    }
+
+    .status-done .card-header {
+        background-color: #198754 !important;
+    }
+
+    .status-cancelled .card-header {
+        background-color: #6c757d !important;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .kanban-column {
+            min-height: 300px;
+            margin-bottom: 1rem;
+        }
+    }
+
+    /* Animation pour les nouvelles tâches */
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .task-card {
+        animation: slideIn 0.3s ease;
+    }
+
+    /* Badges */
+    .badge {
+        font-size: 0.7em;
+    }
+
+    /* Loading state */
+    .loading {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    /* Styles pour le calendrier */
+    .fc-event-late {
+        border: 2px dashed #dc3545 !important;
+    }
+
+    /* Indicateur de connexion */
+    #notificationIndicator {
+        z-index: 1050;
+    }
+    
+    /* Styles pour les notifications */
+.toast {
+    min-width: 250px;
+}
+
+#websocketIndicator {
+    z-index: 1050;
+}
+
+/* Animation pour les nouvelles notifications */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.new-notification {
+    animation: pulse 0.5s ease-in-out;
+}
+  </style>
 </div>
- </div>
- <div layout:fragment="scripts"></div>
- </html>
+</html>
