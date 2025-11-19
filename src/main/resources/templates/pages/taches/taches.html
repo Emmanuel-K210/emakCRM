@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/layout"
+    layout:decorate="layout/layout">
+ 
+ <div layout:fragment="content">
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Gestion des Tâches</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTaskModal">
+            <i class="fas fa-plus me-1"></i>Nouvelle Tâche
+        </button>
+    </div>
+</div>
+
+<!-- Filtres et Vue -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <select class="form-select" id="viewSelect">
+            <option value="list">Vue Liste</option>
+            <option value="kanban">Vue Kanban</option>
+            <option value="calendar">Vue Calendrier</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <select class="form-select">
+            <option>Toutes les priorités</option>
+            <option>Haute</option>
+            <option>Moyenne</option>
+            <option>Basse</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <select class="form-select">
+            <option>Tous les statuts</option>
+            <option>À faire</option>
+            <option>En cours</option>
+            <option>Terminé</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <input type="date" class="form-control" placeholder="Filtrer par date">
+    </div>
+</div>
+
+<!-- Vue Kanban -->
+<div id="kanbanView">
+    <div class="row">
+        <!-- Colonne À Faire -->
+        <div class="col-lg-3 mb-4">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">À Faire <span class="badge bg-light text-dark">3</span></h6>
+                </div>
+                <div class="card-body kanban-column" data-status="todo">
+                    <div class="card task-card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h6 class="card-title mb-0">Préparer réunion client</h6>
+                                <span class="badge bg-danger">Haute</span>
+                            </div>
+                            <p class="card-text small">Réunion avec ABC Corp pour le projet site e-commerce</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="fas fa-clock me-1"></i>Aujourd'hui, 15:00
+                                </small>
+                                <span class="badge bg-secondary">Client</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Colonne En Cours -->
+        <div class="col-lg-3 mb-4">
+            <div class="card border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h6 class="mb-0">En Cours <span class="badge bg-light text-dark">2</span></h6>
+                </div>
+                <div class="card-body kanban-column" data-status="inprogress">
+                    <div class="card task-card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h6 class="card-title mb-0">Rédiger proposition</h6>
+                                <span class="badge bg-warning">Moyenne</span>
+                            </div>
+                            <p class="card-text small">Proposition commerciale pour XYZ Startup</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="fas fa-user me-1"></i>Marie L.
+                                </small>
+                                <span class="badge bg-info">Opportunité</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Colonne En Revue -->
+        <div class="col-lg-3 mb-4">
+            <div class="card border-info">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">En Revue <span class="badge bg-light text-dark">1</span></h6>
+                </div>
+                <div class="card-body kanban-column" data-status="review">
+                    <!-- Tâches en revue -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Colonne Terminé -->
+        <div class="col-lg-3 mb-4">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0">Terminé <span class="badge bg-light text-dark">4</span></h6>
+                </div>
+                <div class="card-body kanban-column" data-status="done">
+                    <div class="card task-card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h6 class="card-title mb-0">Envoyer devis</h6>
+                                <span class="badge bg-success">Terminé</span>
+                            </div>
+                            <p class="card-text small">Devis pour maintenance site web</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="fas fa-check me-1"></i>Terminé
+                                </small>
+                                <span class="badge bg-secondary">Devis</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Nouvelle Tâche -->
+<div class="modal fade" id="addTaskModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nouvelle Tâche</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label class="form-label">Titre</label>
+                        <input type="text" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Priorité</label>
+                                <select class="form-select">
+                                    <option>Haute</option>
+                                    <option>Moyenne</option>
+                                    <option>Basse</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Date d'échéance</label>
+                                <input type="date" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Assigné à</label>
+                        <select class="form-select">
+                            <option>Marie Lambert</option>
+                            <option>Pierre Dubois</option>
+                            <option>Sophie Martin</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary">Créer la tâche</button>
+            </div>
+        </div>
+    </div>
+</div>
+ </div>
+ <div layout:fragment="scripts"></div>
+ </html>
