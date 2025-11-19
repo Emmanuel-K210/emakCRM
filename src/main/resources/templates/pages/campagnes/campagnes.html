@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/layout"
+    layout:decorate="layout/layout">
+ 
+ <div layout:fragment="content">
+ <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Campagnes Marketing</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <button class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i>Nouvelle Campagne
+        </button>
+    </div>
+</div>
+
+<!-- Vue d'ensemble des Campagnes -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center py-3">
+                <h4 class="mb-0">8</h4>
+                <small>Campagnes actives</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center py-3">
+                <h4 class="mb-0">24.5%</h4>
+                <small>Taux d'ouverture</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center py-3">
+                <h4 class="mb-0">3.2%</h4>
+                <small>Taux de conversion</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body text-center py-3">
+                <h4 class="mb-0">1,248</h4>
+                <small>Contacts engagés</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Liste des Campagnes -->
+<div class="card shadow">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h6 class="mb-0">Campagnes en Cours</h6>
+        <div class="btn-group">
+            <button class="btn btn-sm btn-outline-secondary active">Toutes</button>
+            <button class="btn btn-sm btn-outline-secondary">Email</button>
+            <button class="btn btn-sm btn-outline-secondary">Réseaux sociaux</button>
+            <button class="btn btn-sm btn-outline-secondary">Téléphone</button>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <!-- Campagne 1 -->
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">Lancement Produit X</h6>
+                        <span class="badge bg-success">Active</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <small class="text-muted">Type: Email</small>
+                        </div>
+                        <div class="mb-3">
+                            <small class="text-muted">Liste: Clients actifs</small>
+                        </div>
+                        <div class="row text-center">
+                            <div class="col">
+                                <small>Ouverture</small>
+                                <div class="fw-bold text-primary">28.3%</div>
+                            </div>
+                            <div class="col">
+                                <small>Clics</small>
+                                <div class="fw-bold text-info">4.7%</div>
+                            </div>
+                            <div class="col">
+                                <small>Conversion</small>
+                                <div class="fw-bold text-success">2.1%</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <div class="btn-group w-100">
+                            <button class="btn btn-sm btn-outline-primary">Voir</button>
+                            <button class="btn btn-sm btn-outline-success">Rapport</button>
+                            <button class="btn btn-sm btn-outline-warning">Dupliquer</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Campagne 2 -->
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">Promo Hiver 2024</h6>
+                        <span class="badge bg-warning">Planifiée</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <small class="text-muted">Type: Email + SMS</small>
+                        </div>
+                        <div class="mb-3">
+                            <small class="text-muted">Liste: Tous les contacts</small>
+                        </div>
+                        <div class="mb-3">
+                            <small class="text-muted">Début: 15/12/2024</small>
+                        </div>
+                        <div class="progress mb-2">
+                            <div class="progress-bar" style="width: 75%">75% préparé</div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <div class="btn-group w-100">
+                            <button class="btn btn-sm btn-outline-primary">Éditer</button>
+                            <button class="btn btn-sm btn-outline-info">Planifier</button>
+                            <button class="btn btn-sm btn-outline-danger">Annuler</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Liste de Diffusion -->
+<div class="card shadow mt-4">
+    <div class="card-header">
+        <h6 class="mb-0">Listes de Diffusion</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Nom de la liste</th>
+                        <th>Description</th>
+                        <th>Nombre de contacts</th>
+                        <th>Dernière mise à jour</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <strong>Clients Actifs</strong>
+                        </td>
+                        <td>Clients avec achat dans les 6 mois</td>
+                        <td>428</td>
+                        <td>01/12/2024</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-users"></i> Gérer
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>Prospects Chauds</strong>
+                        </td>
+                        <td>Prospects avec score élevé</td>
+                        <td>156</td>
+                        <td>28/11/2024</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-users"></i> Gérer
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+ </div>
+ <div layout:fragment="scripts"></div>
+ </html>
+ 
