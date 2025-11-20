@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.emak.crm.enums.PrioriteTache;
+import com.emak.crm.enums.StatutTache;
 import com.emak.crm.service.TacheService;
 
 import lombok.AllArgsConstructor;
@@ -25,6 +27,8 @@ public class TacheController {
         Model model) {
         
         // Ajouter les données nécessaires au modèle
+    	model.addAttribute("priorites", PrioriteTache.values());
+    	model.addAttribute("statuts", StatutTache.values());
         model.addAttribute("clientId", clientId);
         model.addAttribute("opportuniteId", opportuniteId);
         model.addAttribute("utilisateurId", utilisateurId);

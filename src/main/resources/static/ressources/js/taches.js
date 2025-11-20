@@ -7,13 +7,23 @@ class TacheManager {
         this.init();
     }
 
-    init() {
-        this.loadTaches();
+    async init() {
+        await this.loadTaches();
         this.setupEventListeners();
-        this.loadSelectOptions();
+        await this.loadSelectOptions();
         this.setupDragAndDrop();
         this.setupViewSwitcher();
         this.initCalendar();
+        this.initExports();
+        
+        // Diagnostic après initialisation
+        setTimeout(() => this.diagnosticComplet(), 1000);
+    }
+
+    initExports() {
+        document.getElementById('exportPdf')?.addEventListener('click', () => this.exportToPDF());
+        document.getElementById('exportExcel')?.addEventListener('click', () => this.exportToExcel());
+        document.getElementById('exportCsv')?.addEventListener('click', () => this.exportToCSV());
     }
 
     // === INITIALISATION DES VUES ===
@@ -45,6 +55,108 @@ class TacheManager {
         this.calendar.render();
     }
 
+    // === EXPORTS ===
+    exportToPDF() {
+        try {
+            if (typeof jspdf === 'undefined') {
+                this.showAlert('Bibliothèque PDF non chargée', 'warning');
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.text('Liste des Tâches - eMakCRM', 20, 20);
+            doc.text(`Généré le ${new Date().toLocaleDateString('fr-FR')}`, 20, 30);
+            
+            let yPosition = 50;
+            this.taches.forEach((tache, index) => {
+                if (yPosition > 270) {
+                    doc.addPage();
+                    yPosition = 20;
+                }
+                
+                doc.text(`${index + 1}. ${tache.titre}`, 20, yPosition);
+                doc.text(`   Statut: ${tache.statut} | Priorité: ${tache.priorite}`, 20, yPosition + 7);
+                yPosition += 20;
+            });
+            
+            doc.save(`taches-${new Date().toISOString().split('T')[0]}.pdf`);
+            this.showAlert('PDF exporté avec succès!', 'success');
+            
+        } catch (error) {
+            console.error('Erreur export PDF:', error);
+            this.showAlert('Erreur lors de l\'export PDF', 'danger');
+        }
+    }
+
+    exportToExcel() {
+        try {
+            if (typeof XLSX === 'undefined') {
+                this.showAlert('Bibliothèque Excel non chargée', 'warning');
+                return;
+            }
+
+            const data = this.taches.map(tache => ({
+                'ID': tache.id,
+                'Titre': tache.titre,
+                'Description': tache.description || '',
+                'Statut': tache.statut,
+                'Priorité': tache.priorite,
+                'Date Échéance': tache.dateEcheance ? new Date(tache.dateEcheance).toLocaleDateString('fr-FR') : '',
+                'Assigné à': tache.nomUtilisateur || 'Non assigné'
+            }));
+            
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Tâches');
+            XLSX.writeFile(wb, `taches-${new Date().toISOString().split('T')[0]}.xlsx`);
+            
+            this.showAlert('Excel exporté avec succès!', 'success');
+            
+        } catch (error) {
+            console.error('Erreur export Excel:', error);
+            this.showAlert('Erreur lors de l\'export Excel', 'danger');
+        }
+    }
+
+    exportToCSV() {
+        try {
+            const headers = ['ID', 'Titre', 'Statut', 'Priorité', 'Échéance', 'Assigné à'];
+            const csvData = this.taches.map(tache => [
+                tache.id,
+                `"${tache.titre.replace(/"/g, '""')}"`,
+                tache.statut,
+                tache.priorite,
+                tache.dateEcheance ? new Date(tache.dateEcheance).toLocaleDateString('fr-FR') : '',
+                `"${(tache.nomUtilisateur || '').replace(/"/g, '""')}"`
+            ]);
+            
+            const csvContent = [
+                headers.join(','),
+                ...csvData.map(row => row.join(','))
+            ].join('\n');
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `taches-${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            this.showAlert('CSV exporté avec succès!', 'success');
+            
+        } catch (error) {
+            console.error('Erreur export CSV:', error);
+            this.showAlert('Erreur lors de l\'export CSV', 'danger');
+        }
+    }
+
     setupViewSwitcher() {
         const viewSelect = document.getElementById('viewSelect');
         if (viewSelect) {
@@ -57,12 +169,22 @@ class TacheManager {
     // === GESTION DES DONNÉES ===
     async loadTaches() {
         try {
+            console.log('Chargement des tâches...');
+            
             const response = await fetch('/api/taches');
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
             this.taches = await response.json();
+            console.log('Tâches chargées:', this.taches.length);
+            
             this.refreshAllViews();
+            
         } catch (error) {
-            this.showAlert('Erreur lors du chargement des tâches', 'danger');
-            console.error('Erreur chargement tâches:', error);
+            console.error('Erreur détaillée:', error);
+            this.showAlert('Erreur lors du chargement des tâches: ' + error.message, 'danger');
         }
     }
 
@@ -134,6 +256,7 @@ class TacheManager {
             this.createTaskCard(tache);
             counts[tache.statut] = (counts[tache.statut] || 0) + 1;
         });
+		
 
         // Mettre à jour les compteurs
         Object.keys(counts).forEach(statut => {
@@ -142,6 +265,7 @@ class TacheManager {
                 element.textContent = counts[statut];
             }
         });
+		
     }
 
     createTaskCard(tache) {
@@ -151,7 +275,7 @@ class TacheManager {
         const card = document.createElement('div');
         card.className = 'card task-card mb-3';
         card.draggable = true;
-        card.dataset.taskId = tache.id;
+        card.dataset.taskId = tache.idTache;
 
         const priorityClass = this.getPriorityClass(tache.priorite);
         const statusClass = this.getStatusClass(tache.statut);
@@ -161,13 +285,13 @@ class TacheManager {
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start mb-2">
                     <h6 class="card-title mb-0">${this.escapeHtml(tache.titre)}</h6>
-                    <span class="badge ${priorityClass}">${tache.priorite}</span>
+                   <span class="badge ${priorityClass}">${tache.priorite}</span>
                 </div>
                 ${tache.description ? `<p class="card-text small">${this.escapeHtml(tache.description)}</p>` : ''}
                 
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <small class="text-muted">
-                        <i class="fas fa-user me-1"></i>${tache.utilisateurNom || 'Non assigné'}
+                        <i class="fas fa-user me-1"></i>${tache.nomUtilisateur || 'Non assigné'}
                     </small>
                     <span class="badge ${statusClass}">${tache.statut}</span>
                 </div>
@@ -182,14 +306,14 @@ class TacheManager {
                 ` : ''}
                 
                 <div class="mt-2 d-flex gap-1">
-                    <button class="btn btn-sm btn-outline-primary edit-task" data-id="${tache.id}">
-                        <i class="fas fa-edit"></i>
+                    <button class="btn btn-sm btn-outline-primary edit-task" data-id="${tache.idTache}">
+                        <i class="ti ti-edit"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-success change-status" data-id="${tache.id}">
-                        <i class="fas fa-sync-alt"></i>
+                    <button class="btn btn-sm btn-outline-success change-status" data-id="${tache.idTache}">
+                      <i class="ti ti-refresh"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-danger delete-task" data-id="${tache.id}">
-                        <i class="fas fa-trash"></i>
+                    <button class="btn btn-sm btn-outline-danger delete-task" data-id="${tache.idTache}">
+                        <i class="ti ti-trash"></i>
                     </button>
                 </div>
             </div>
@@ -197,15 +321,15 @@ class TacheManager {
 
         // Ajouter les écouteurs d'événements
         card.querySelector('.edit-task').addEventListener('click', () => {
-            this.editTache(tache.id);
+            this.editTache(tache.idTache);
         });
         
         card.querySelector('.change-status').addEventListener('click', () => {
-            this.showStatusModal(tache.id);
+            this.showStatusModal(tache.idTache);
         });
         
         card.querySelector('.delete-task').addEventListener('click', () => {
-            this.deleteTache(tache.id);
+            this.deleteTache(tache.idTache);
         });
 
         // Configurer le drag & drop
@@ -240,7 +364,7 @@ class TacheManager {
                         ${tache.statut}
                     </span>
                 </td>
-                <td>${tache.utilisateurNom || 'Non assigné'}</td>
+                <td>${tache.nomUtilisateur || 'Non assigné'}</td>
                 <td>
                     ${tache.dateEcheance ? `
                         <span class="${isLate ? 'text-danger' : ''}">
@@ -250,26 +374,26 @@ class TacheManager {
                         </span>
                     ` : 'Non définie'}
                 </td>
-                <td>${tache.clientNom || '-'}</td>
+                <td>${tache.nomClient || '-'}</td>
                 <td>
                     <div class="btn-group btn-group-sm">
-                        <button class="btn btn-outline-primary edit-task" data-id="${tache.id}">
-                            <i class="fas fa-edit"></i>
+                        <button class="btn btn-outline-primary edit-task" data-id="${tache.idTache}">
+                            <i class="ti ti-edit"></i>
                         </button>
-                        <button class="btn btn-outline-success change-status" data-id="${tache.id}">
-                            <i class="fas fa-sync-alt"></i>
+                        <button class="btn btn-outline-success change-status" data-id="${tache.idTache}">
+                            <i class="ti ti-refresh"></i>
                         </button>
-                        <button class="btn btn-outline-danger delete-task" data-id="${tache.id}">
-                            <i class="fas fa-trash"></i>
+                        <button class="btn btn-outline-danger delete-task" data-id="${tache.idTache}">
+                            <i class="ti ti-trash"></i>
                         </button>
                     </div>
                 </td>
             `;
 
             // Ajouter les écouteurs d'événements
-            row.querySelector('.edit-task').addEventListener('click', () => this.editTache(tache.id));
-            row.querySelector('.change-status').addEventListener('click', () => this.showStatusModal(tache.id));
-            row.querySelector('.delete-task').addEventListener('click', () => this.deleteTache(tache.id));
+            row.querySelector('.edit-task').addEventListener('click', () => this.editTache(tache.idTache));
+            row.querySelector('.change-status').addEventListener('click', () => this.showStatusModal(tache.idTache));
+            row.querySelector('.delete-task').addEventListener('click', () => this.deleteTache(tache.idTache));
 
             tbody.appendChild(row);
         });
@@ -325,25 +449,34 @@ class TacheManager {
         e.target.closest('.kanban-column').classList.remove('drag-over');
     }
 
-    async handleDrop(e) {
-        e.preventDefault();
-        const column = e.target.closest('.kanban-column');
-        column.classList.remove('drag-over');
+	async handleDrop(e) {
+	    e.preventDefault();
+	    const column = e.target.closest('.kanban-column');
+	    if (!column) return;
+	    
+	    column.classList.remove('drag-over');
 
-        if (this.draggedTask) {
-            const taskId = this.draggedTask.dataset.taskId;
-            const newStatus = column.dataset.status;
+	    if (this.draggedTask) {
+	        // ✅ RÉCUPÉRATION ET VALIDATION
+	        const taskId = this.draggedTask.dataset.taskId;
+	        const newStatus = column.dataset.status;
 
-            try {
-                await this.updateTaskStatus(taskId, newStatus);
-                this.draggedTask.remove();
-                this.loadTaches(); // Recharger pour mettre à jour l'affichage
-            } catch (error) {
-                this.showAlert('Erreur lors du déplacement de la tâche', 'danger');
-                console.error('Erreur déplacement tâche:', error);
-            }
-        }
-    }
+	        console.log("🔍 Drag&Drop - ID:", taskId, "Nouveau statut:", newStatus);
+
+	        if (!taskId || taskId === 'undefined') {
+	            console.error('❌ ID invalide dans drag&drop');
+	            this.showAlert('Erreur: impossible de déplacer cette tâche', 'danger');
+	            return;
+	        }
+
+	        try {
+	            await this.updateTaskStatus(taskId, newStatus);
+	        } catch (error) {
+	            console.error('❌ Erreur déplacement:', error);
+	            this.loadTaches(); // Restaurer l'interface
+	        }
+	    }
+	}
 
     // === GESTION DU CALENDRIER ===
     formatTachesForCalendar(info, successCallback, failureCallback) {
@@ -351,7 +484,7 @@ class TacheManager {
             const isLate = this.isTaskLate(tache);
             
             return {
-                id: tache.id.toString(),
+                id: tache.idTache.toString(),
                 title: tache.titre,
                 start: tache.dateDebut || tache.dateEcheance || new Date(),
                 end: tache.dateEcheance,
@@ -370,8 +503,9 @@ class TacheManager {
 
     getCalendarEventColor(tache) {
         const colors = {
+            'URGENTE': '#ff001a',
             'HAUTE': '#dc3545',
-            'MOYENNE': '#ffc107',
+            'NORMALE': '#ffc107',
             'BASSE': '#198754'
         };
 
@@ -418,20 +552,89 @@ class TacheManager {
     }
 
     // === ACTIONS SUR LES TÂCHES ===
-    async updateTaskStatus(taskId, newStatus) {
-        const response = await fetch(`/api/taches/${taskId}/statut`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ statut: newStatus })
-        });
+	
+	async updateTaskStatus(taskId, newStatus) {
+	    // ✅ VALIDATION OBLIGATOIRE
+	    console.log("🔍 Debug updateTaskStatus - ID reçu:", taskId, "Type:", typeof taskId);
+	    
+	    if (!taskId || taskId === 'undefined' || taskId === 'null') {
+	        console.error('❌ ID invalide:', taskId);
+	        this.showAlert('Erreur: ID de tâche invalide', 'danger');
+	        return;
+	    }
 
-        if (!response.ok) {
-            throw new Error('Erreur mise à jour statut');
+	    // ✅ CONVERSION SÉCURISÉE
+	    const id = Number(taskId);
+	    if (isNaN(id) || id <= 0) {
+	        console.error('❌ ID non numérique:', taskId);
+	        this.showAlert('Erreur: ID de tâche non valide', 'danger');
+	        return;
+	    }
+
+	    try {
+	        console.log(`🔄 PUT /api/taches/${id}/statut - ${newStatus}`);
+	        
+	        // ✅ UTILISER VOTRE ENDPOINT PATCH EXISTANT
+	        const response = await fetch(`/api/taches/${id}/statut`, {
+	            method: 'PATCH',
+	            headers: {
+	                'Content-Type': 'application/json',
+	            },
+	            body: JSON.stringify({ 
+	                statut: newStatus 
+	            })
+	        });
+
+	        if (!response.ok) {
+	            const errorText = await response.text();
+	            throw new Error(`HTTP ${response.status}: ${errorText}`);
+	        }
+
+	        const result = await response.json();
+	        console.log('✅ Statut mis à jour:', result);
+	        
+	        this.showAlert('Statut mis à jour avec succès', 'success');
+	        await this.loadTaches(); // Recharger les données
+	        
+	    } catch (error) {
+	        console.error('❌ Erreur mise à jour statut:', error);
+	        this.showAlert('Erreur lors de la mise à jour: ' + error.message, 'danger');
+	    }
+	}
+
+    async updateTaskStatusFallback(taskId, newStatus) {
+        try {
+            // Récupérer la tâche existante
+            const getResponse = await fetch(`/api/taches/${taskId}`);
+            if (!getResponse.ok) throw new Error('Tâche non trouvée');
+            
+            const tache = await getResponse.json();
+            
+            // Mettre à jour seulement le statut
+            const updatedTache = {
+                ...tache,
+                statut: newStatus
+            };
+            
+            // Envoyer la mise à jour complète
+            const updateResponse = await fetch(`/api/taches/${taskId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updatedTache)
+            });
+
+            if (!updateResponse.ok) {
+                throw new Error('Erreur mise à jour');
+            }
+            
+            this.showAlert('Statut mis à jour avec succès', 'success');
+            await this.loadTaches();
+            
+        } catch (error) {
+            throw new Error(`Fallback failed: ${error.message}`);
         }
-
-        this.showAlert('Statut de la tâche mis à jour avec succès', 'success');
     }
 
     async updateTaskDates(taskId, dateDebut, dateEcheance) {
@@ -457,7 +660,6 @@ class TacheManager {
         }
     }
 
-	
     async updateTaskEndDate(taskId, dateEcheance) {
         const response = await fetch(`/api/taches/${taskId}`);
         const tache = await response.json();
@@ -492,17 +694,17 @@ class TacheManager {
 
     showEditModal(tache) {
         // Remplir le formulaire avec les données de la tâche
-        document.querySelector('input[name="titre"]').value = tache.titre || '';
-        document.querySelector('textarea[name="description"]').value = tache.description || '';
-        document.querySelector('select[name="priorite"]').value = tache.priorite || '';
-        document.querySelector('input[name="dateDebut"]').value = this.formatDateTimeForInput(tache.dateDebut);
-        document.querySelector('input[name="dateEcheance"]').value = this.formatDateTimeForInput(tache.dateEcheance);
-        document.querySelector('select[name="idUtilisateur"]').value = tache.idUtilisateur || '';
-        document.querySelector('select[name="idClient"]').value = tache.idClient || '';
-        document.querySelector('select[name="idOpportunite"]').value = tache.idOpportunite || '';
+        const form = document.getElementById('taskForm');
+        form.querySelector('input[name="titre"]').value = tache.titre || '';
+        form.querySelector('textarea[name="description"]').value = tache.description || '';
+        form.querySelector('select[name="priorite"]').value = tache.priorite || '';
+        form.querySelector('input[name="dateDebut"]').value = this.formatDateTimeForInput(tache.dateDebut);
+        form.querySelector('input[name="dateEcheance"]').value = this.formatDateTimeForInput(tache.dateEcheance);
+        form.querySelector('select[name="idUtilisateur"]').value = tache.idUtilisateur || '';
+        form.querySelector('select[name="idClient"]').value = tache.idClient || '';
+        form.querySelector('select[name="idOpportunite"]').value = tache.idOpportunite || '';
 
         // Changer le formulaire pour la mise à jour
-        const form = document.getElementById('taskForm');
         form.method = 'PUT';
         form.action = `/api/taches/${tache.id}`;
 
@@ -611,15 +813,15 @@ class TacheManager {
         document.getElementById('taskForm').addEventListener('submit', this.handleFormSubmit.bind(this));
 
         // Filtres
-        document.getElementById('statusFilter').addEventListener('change', () => this.applyFilters());
-        document.getElementById('priorityFilter').addEventListener('change', () => this.applyFilters());
-        document.getElementById('dateFilter').addEventListener('change', () => this.applyFilters());
+        document.getElementById('statusFilter')?.addEventListener('change', () => this.applyFilters());
+        document.getElementById('priorityFilter')?.addEventListener('change', () => this.applyFilters());
+        document.getElementById('dateFilter')?.addEventListener('change', () => this.applyFilters());
         
         // Réinitialisation filtres
-        document.getElementById('resetFilters').addEventListener('click', () => this.resetFilters());
+        document.getElementById('resetFilters')?.addEventListener('click', () => this.resetFilters());
 
         // Réinitialiser le formulaire quand le modal est fermé
-        document.getElementById('addTaskModal').addEventListener('hidden.bs.modal', () => {
+        document.getElementById('addTaskModal')?.addEventListener('hidden.bs.modal', () => {
             this.resetForm();
         });
     }
@@ -663,7 +865,7 @@ class TacheManager {
                 this.resetForm();
             } else {
                 const error = await response.json();
-                throw new Error(error.error || 'Erreur inconnue');
+                throw new Error(error.message || 'Erreur inconnue');
             }
         } catch (error) {
             this.showAlert('Erreur: ' + error.message, 'danger');
@@ -671,9 +873,9 @@ class TacheManager {
     }
 
     applyFilters() {
-        const statusFilter = document.getElementById('statusFilter').value;
-        const priorityFilter = document.getElementById('priorityFilter').value;
-        const dateFilter = document.getElementById('dateFilter').value;
+        const statusFilter = document.getElementById('statusFilter')?.value;
+        const priorityFilter = document.getElementById('priorityFilter')?.value;
+        const dateFilter = document.getElementById('dateFilter')?.value;
 
         let filteredTaches = this.taches;
 
@@ -720,6 +922,7 @@ class TacheManager {
     }
 
     formatDate(dateString) {
+        if (!dateString) return 'Non définie';
         return new Date(dateString).toLocaleDateString('fr-FR');
     }
 
@@ -736,8 +939,9 @@ class TacheManager {
 
     getPriorityClass(priorite) {
         const classes = {
+            'URGENTE': 'bg-danger',
             'HAUTE': 'bg-danger',
-            'MOYENNE': 'bg-warning',
+            'NORMALE': 'bg-warning',
             'BASSE': 'bg-success'
         };
         return classes[priorite] || 'bg-secondary';
@@ -762,14 +966,56 @@ class TacheManager {
         `;
 
         const container = document.querySelector('.container-fluid');
-        container.insertBefore(alertDiv, container.firstChild);
+        if (container) {
+            container.insertBefore(alertDiv, container.firstChild);
 
-        // Auto-supprimer après 5 secondes
-        setTimeout(() => {
-            if (alertDiv.parentNode) {
-                alertDiv.remove();
+            // Auto-supprimer après 5 secondes
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+    }
+
+    // === DIAGNOSTIC ===
+    async diagnosticComplet() {
+        console.log('=== DIAGNOSTIC TACHEMANAGER ===');
+        
+        // Test des endpoints
+        const endpoints = [
+            '/api/taches',
+            '/api/references/utilisateurs',
+            '/api/references/clients',
+            '/api/references/opportunites'
+        ];
+        
+        for (const endpoint of endpoints) {
+            try {
+                const response = await fetch(endpoint);
+                console.log(`✅ ${endpoint}: ${response.status}`);
+            } catch (error) {
+                console.log(`❌ ${endpoint}: ${error.message}`);
             }
-        }, 5000);
+        }
+        
+        // Vérification des données
+        console.log(`Tâches chargées: ${this.taches.length}`);
+        console.log(`Vue active: ${this.currentView}`);
+        console.log(`Calendar initialisé: ${!!this.calendar}`);
+        
+        // Vérification des bibliothèques
+        const libs = {
+            'FullCalendar': typeof FullCalendar,
+            'SockJS': typeof SockJS, 
+            'Stomp': typeof Stomp,
+            'jspdf': typeof jspdf,
+            'XLSX': typeof XLSX
+        };
+        
+        Object.entries(libs).forEach(([lib, status]) => {
+            console.log(`${status !== 'undefined' ? '✅' : '❌'} ${lib}`);
+        });
     }
 }
 
@@ -787,27 +1033,31 @@ class NotificationManager {
     }
 
     connectWebSocket() {
-        const socket = new SockJS('/ws-taches');
-        this.stompClient = Stomp.over(socket);
+        try {
+            const socket = new SockJS('/ws-taches');
+            this.stompClient = Stomp.over(socket);
 
-        this.stompClient.connect({}, (frame) => {
-            this.connected = true;
-            console.log('✅ Connecté aux notifications WebSocket');
-            this.showConnectionStatus(true);
+            this.stompClient.connect({}, (frame) => {
+                this.connected = true;
+                console.log('✅ Connecté aux notifications WebSocket');
+                this.showConnectionStatus(true);
 
-            // S'abonner aux notifications de tâches
-            this.stompClient.subscribe('/topic/taches', (message) => {
-                const notification = JSON.parse(message.body);
-                this.handleNotification(notification);
+                // S'abonner aux notifications de tâches
+                this.stompClient.subscribe('/topic/taches', (message) => {
+                    const notification = JSON.parse(message.body);
+                    this.handleNotification(notification);
+                });
+            }, (error) => {
+                console.error('❌ Erreur WebSocket:', error);
+                this.connected = false;
+                this.showConnectionStatus(false);
+                
+                // Tentative de reconnexion après 5 secondes
+                setTimeout(() => this.connectWebSocket(), 5000);
             });
-        }, (error) => {
-            console.error('❌ Erreur WebSocket:', error);
-            this.connected = false;
-            this.showConnectionStatus(false);
-            
-            // Tentative de reconnexion après 5 secondes
-            setTimeout(() => this.connectWebSocket(), 5000);
-        });
+        } catch (error) {
+            console.error('Erreur initialisation WebSocket:', error);
+        }
     }
 
     handleNotification(notification) {
@@ -848,19 +1098,23 @@ class NotificationManager {
     }
 
     playNotificationSound() {
-        // Créer un son simple (optionnel)
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        oscillator.frequency.value = 800;
-        gainNode.gain.value = 0.1;
-        
-        oscillator.start();
-        setTimeout(() => oscillator.stop(), 100);
+        try {
+            // Créer un son simple (optionnel)
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 800;
+            gainNode.gain.value = 0.1;
+            
+            oscillator.start();
+            setTimeout(() => oscillator.stop(), 100);
+        } catch (error) {
+            console.log('Son notification ignoré');
+        }
     }
 
     showConnectionStatus(connected) {
@@ -898,6 +1152,12 @@ class NotificationManager {
         }
     }
 
+    setupNotificationUI() {
+        document.getElementById('enableNotifications')?.addEventListener('click', () => {
+            this.requestNotificationPermission();
+        });
+    }
+
     disconnect() {
         if (this.stompClient) {
             this.stompClient.disconnect();
@@ -905,16 +1165,11 @@ class NotificationManager {
     }
 }
 
-//Initialisation
+// Initialisation
 document.addEventListener('DOMContentLoaded', function() {
     // Initialiser le gestionnaire de tâches
     window.tacheManager = new TacheManager();
     
     // Initialiser les notifications WebSocket
     window.notificationManager = new NotificationManager(window.tacheManager);
-    
-    // Demander la permission des notifications
-    document.getElementById('enableNotifications')?.addEventListener('click', () => {
-        window.notificationManager.requestNotificationPermission();
-    });
 });
