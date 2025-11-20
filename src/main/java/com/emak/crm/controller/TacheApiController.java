@@ -3,6 +3,7 @@ package com.emak.crm.controller;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,45 +27,42 @@ import lombok.AllArgsConstructor;
 @RestController
 @RequestMapping("/api/taches")
 @AllArgsConstructor
-@CrossOrigin(origins = "http://localhost:8080")
+@CrossOrigin(origins = "http://localhost:8081")
 public class TacheApiController {
     
     private final TacheService tacheService;
 
     @GetMapping
-    public List<TacheResponse> getAllTaches(
+    public ResponseEntity<?> getAllTaches(
             @RequestParam(required = false) String statut,
             @RequestParam(required = false) String priorite,
             @RequestParam(required = false) Long utilisateurId,
             @RequestParam(required = false) Long clientId,
             @RequestParam(required = false) Long opportuniteId) {
         
-        if (statut != null) {
-            return tacheService.getTachesByStatut(statut);
+        try {
+            List<TacheResponse> taches;
+            
+            if (statut != null) {
+                taches = tacheService.getTachesByStatut(statut);
+            } else if (utilisateurId != null) {
+                taches = tacheService.getTachesByUtilisateur(utilisateurId);
+            } else if (clientId != null) {
+                taches = tacheService.getTachesByClient(clientId);
+            } else if (opportuniteId != null) {
+                taches = tacheService.getTachesByOpportunite(opportuniteId);
+            } else {
+                taches = tacheService.getAllTaches(); 
+            }
+            
+            return ResponseEntity.ok(taches);
+            
+        } catch (EntityNotFound e) {
+            return ResponseEntity.ok(List.of());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erreur serveur: " + e.getMessage());
         }
-        if (utilisateurId != null) {
-            try {
-				return tacheService.getTachesByUtilisateur(utilisateurId);
-			} catch (EntityNotFound e) {
-				return List.of();
-			}
-        }
-        
-        if (clientId != null) {
-            // Implémenter cette méthode dans le service
-            // return tacheService.getTachesByClient(clientId);
-        }
-        
-        if (opportuniteId != null) {
-            try {
-				return tacheService.getTachesByOpportunite(opportuniteId);
-			} catch (EntityNotFound e) {
-				return List.of();
-			}
-        }
-        
-        // Pour l'instant retourner vide, à implémenter
-        return List.of();
     }
 
     @GetMapping("/{id}")

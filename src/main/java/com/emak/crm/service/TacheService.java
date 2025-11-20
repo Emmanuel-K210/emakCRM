@@ -71,4 +71,10 @@ public interface TacheService {
 	     * MISE À JOUR COMPLÈTE D'UNE TÂCHE
 	     */
 	   TacheResponse updateTache(Long id, TacheRequest request) throws EntityNotFound;
+
+
+	   List<TacheResponse> getAllTaches();
+
+
+	   List<TacheResponse> getTachesByClient(Long clientId) throws EntityNotFound;
 }
