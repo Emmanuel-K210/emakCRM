@@ -1,122 +1,175 @@
-<html lang="en" xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/layout"
-      layout:decorate="layout/layout">
-<body>
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/layout"
+    layout:decorate="layout/layout">
+ 
 <div layout:fragment="content">
-
-    <header class="d-flex justify-content-between align-items-center p-3 border-bottom">
-        <h2>Paiements</h2>
-        <div class="d-flex align-items-center">
-            <input type="text" class="form-control form-control-sm me-2" placeholder="Rechercher...">
-            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#paiementModal">+ Nouveau paiement</button>
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Gestion des Paiements</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paiementModal">
+                <i class="ti ti-plus"></i> Nouveau Paiement
+            </button>
         </div>
-    </header>
-
-    <div class="table-responsive mt-3">
-        <table class="table table-hover align-middle mt-3">
-            <thead class="table-light">
-            <tr>
-                <th>Facture</th>
-                <th>Client</th>
-                <th>Montant</th>
-                <th>Date</th>
-                <th>Mode</th>
-                <th>Statut</th>
-                <th>Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="paiement : ${paiementsPage.content}">
-                <td th:text="${paiement.factureId}">Facture</td>
-                <td th:text="${paiement.factureClientNom}">Client</td>
-                <td th:text="${paiement.montant}">0.00</td>
-                <td th:text="${paiement.datePaiement}">2025-01-01</td>
-                <td th:text="${paiement.modePaiement}">ESPECE</td>
-                <td>
-                    <span th:text="${paiement.statut}"
-                          th:classappend="${paiement.statut}=='EN_ATTENTE' ? 'badge bg-warning' : (paiement.statut=='REUSSI' ? 'badge bg-success' : 'badge bg-danger')">
-                        EN_ATTENTE
-                    </span>
-                </td>
-                <td>
-                    <a href="javascript:void(0);" th:onclick="'openEditModal(' + ${paiement.id} + ')'" class="btn btn-sm btn-warning" title="Modifier">
-                        <i class="ti ti-pencil"></i>
-                    </a>
-                    <a href="javascript:void(0);" th:onclick="'confirmDelete(\'/paiements/supprimer?id=' + ${paiement.id} + '\')'" class="btn btn-sm btn-danger" title="Supprimer">
-                        <i class="ti ti-trash"></i>
-                    </a>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-
-        <nav aria-label="Page navigation" class="mt-3">
-            <ul class="pagination justify-content-center">
-                <li class="page-item" th:classappend="${paiementsPage.first} ? 'disabled'">
-                    <a class="page-link" th:href="@{/paiements(page=${paiementsPage.number - 1})}">Précédent</a>
-                </li>
-                <li class="page-item" th:each="i : ${#numbers.sequence(0, paiementsPage.totalPages -1)}"
-                    th:classappend="${i == paiementsPage.number} ? 'active'">
-                    <a class="page-link" th:href="@{/paiements(page=${i})}" th:text="${i + 1}">1</a>
-                </li>
-                <li class="page-item" th:classappend="${paiementsPage.last} ? 'disabled'">
-                    <a class="page-link" th:href="@{/paiements(page=${paiementsPage.number + 1})}">Suivant</a>
-                </li>
-            </ul>
-        </nav>
     </div>
 
-    <!-- MODAL CREATION / EDIT PAIEMENT -->
-    <div class="modal fade" id="paiementModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <form th:action="@{/paiements/enregistrer}" method="post">
-                    <input type="hidden" name="id" id="paiementId">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modalTitle">Nouveau paiement</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="factureId" class="form-label">Facture</label>
-                                <select class="form-select" id="factureId" name="factureId" required>
-                                    <option th:each="f : ${factures}" th:value="${f.id}" th:text="${f.id}">Facture</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="montant" class="form-label">Montant</label>
-                                <input type="number" step="0.01" class="form-control" id="montant" name="montant" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="modePaiement" class="form-label">Mode de paiement</label>
-                                <select class="form-select" id="modePaiement" name="modePaiement">
-                                    <option value="ESPECE">ESPECE</option>
-                                    <option value="CB">CB</option>
-                                    <option value="VIREMENT">VIREMENT</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="statut" class="form-label">Statut</label>
-                                <select class="form-select" id="statut" name="statut">
-                                    <option value="EN_ATTENTE">EN_ATTENTE</option>
-                                    <option value="REUSSI">REUSSI</option>
-                                    <option value="ECHOUE">ECHOUE</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                        <button type="submit" class="btn btn-primary" id="submitBtn">Enregistrer</button>
-                    </div>
-                </form>
+    <!-- Alertes -->
+    <div id="alertContainer"></div>
+
+    <!-- Statistiques -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h6 class="card-title">Paiements Validés</h6>
+                    <h3 id="countValides" class="card-text">0</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h6 class="card-title">En Attente</h6>
+                    <h3 id="countAttente" class="card-text">0</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <h6 class="card-title">Refusés</h6>
+                    <h3 id="countRefuses" class="card-text">0</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h6 class="card-title">Total Encaissé</h6>
+                    <h3 id="totalEncaisse" class="card-text">0 €</h3>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Filtres -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Statut</label>
+                    <select id="statutFilter" class="form-select">
+                        <option value="">Tous les statuts</option>
+                        <option value="VALIDE">Validé</option>
+                        <option value="EN_ATTENTE">En attente</option>
+                        <option value="REFUSE">Refusé</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Mode de paiement</label>
+                    <select id="modeFilter" class="form-select">
+                        <option value="">Tous les modes</option>
+                        <option value="CARTE">Carte</option>
+                        <option value="VIREMENT">Virement</option>
+                        <option value="CHEQUE">Chèque</option>
+                        <option value="ESPECES">Espèces</option>
+                        <option value="PRELEVEMENT">Prélèvement</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Date de début</label>
+                    <input type="date" id="dateFromFilter" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Date de fin</label>
+                    <input type="date" id="dateToFilter" class="form-control">
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <button id="applyFilters" class="btn btn-primary">Filtrer</button>
+                    <button id="resetFilters" class="btn btn-secondary">Réinitialiser</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tableau -->
+    <div class="card">
+        <div class="card-body">
+            <table id="paiementsTable" class="table table-striped table-hover" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Référence</th>
+                        <th>Facture</th>
+                        <th>Client</th>
+                        <th>Date</th>
+                        <th>Montant</th>
+                        <th>Mode</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
 </div>
 
-<script th:src="@{/ressources/js/paiements.js}" defer></script>
-</body>
+<div layout:fragment="scripts">
+    <!-- Modal Paiement -->
+    <div class="modal fade" id="paiementModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nouveau Paiement</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="paiementForm">
+                        <div class="mb-3">
+                            <label class="form-label">Facture *</label>
+                            <select name="idFacture" class="form-select" required>
+                                <option value="">Choisir une facture...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Date du paiement</label>
+                            <input type="date" name="datePaiement" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Montant *</label>
+                            <input type="number" name="montant" class="form-control" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Mode de paiement *</label>
+                            <select name="modePaiement" class="form-select" required>
+                                <option value="">Choisir un mode...</option>
+                                <option value="CARTE">Carte bancaire</option>
+                                <option value="VIREMENT">Virement</option>
+                                <option value="CHEQUE">Chèque</option>
+                                <option value="ESPECES">Espèces</option>
+                                <option value="PRELEVEMENT">Prélèvement</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Référence transaction</label>
+                            <input type="text" name="referenceTransaction" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Libellé *</label>
+                            <input type="text" name="libelle" class="form-control" required>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" form="paiementForm" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/ressources/js/paiement-manager.js"></script>
+</div>
 </html>

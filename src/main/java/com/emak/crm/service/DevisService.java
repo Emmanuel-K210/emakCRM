@@ -1,5 +1,7 @@
 package com.emak.crm.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.emak.crm.dto.DevisRequest;
@@ -10,5 +12,6 @@ public interface DevisService extends CrudService<DevisRequest, DevisResponse>{
 	DevisResponse findByIdPourConversion(Number id) throws EntityNotFound;
 	 DevisResponse envoyerDevis(Long id) throws EntityNotFound;
 	 DevisResponse convertirEnFacture(Long id) throws EntityNotFound;
+	 List<DevisResponse> findByDevisConvertible();
 	 
 }

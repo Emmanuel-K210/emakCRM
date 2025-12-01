@@ -1,316 +1,322 @@
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org"
-    xmlns:layout="http://www.ultraq.net.nz/layout"
-    layout:decorate="layout/layout">
-    
-    <div layout:fragment="content">
-        <div class="container-fluid">
-            
-            <!-- EN-TÊTE AVEC TITRE ET BOUTON -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h4 class="text-primary mb-1">
-                        <i class="ti ti-users me-2"></i>Gestion des Clients
-                    </h4>
-                    <p class="text-muted mb-0">Gérez votre portefeuille clients et prospects</p>
-                </div>
-                <a th:href="@{/clients/ajouter}" class="btn btn-primary">
-                    <i class="ti ti-user-plus me-2"></i>Nouveau Client
-                </a>
-            </div>
+	xmlns:layout="http://www.ultraq.net.nz/layout"
+	layout:decorate="layout/layout">
 
-            <!-- CARTES DE STATISTIQUES -->
-            <div class="row mb-4">
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card bg-primary text-white">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h5 class="card-title">Total Clients</h5>
-                                    <h2 class="mb-0" th:text="${stats.totalClients}">0</h2>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="ti ti-users fa-2x opacity-50"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<head>
+	<title>gestion des clients</title>
+</head>
+<div layout:fragment="content">
+	<div class="container-fluid">
 
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card bg-success text-white">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h5 class="card-title">Clients Actifs</h5>
-                                    <h2 class="mb-0" th:text="${stats.clientsActifs}">0</h2>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="ti ti-user-check fa-2x opacity-50"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+		<!-- EN-TÊTE AVEC TITRE ET BOUTON -->
+		<div class="d-flex justify-content-between align-items-center mb-4">
+			<div>
+				<h4 class="text-primary mb-1">
+					<i class="ti ti-users me-2"></i>Gestion des Clients
+				</h4>
+				<p class="text-muted mb-0">Gérez votre portefeuille clients et
+					prospects</p>
+			</div>
+			<a th:href="@{/clients/ajouter}" class="btn btn-primary"> <i
+				class="ti ti-user-plus me-2"></i>Nouveau Client
+			</a>
+		</div>
 
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card bg-warning text-white">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h5 class="card-title">Prospects</h5>
-                                    <h2 class="mb-0" th:text="${stats.prospects}">0</h2>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="ti ti-user-search fa-2x opacity-50"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+		<!-- CARTES DE STATISTIQUES -->
+		<div class="row mb-4">
+			<div class="col-xl-3 col-md-6 mb-4">
+				<div class="card bg-primary text-white">
+					<div class="card-body">
+						<div class="d-flex justify-content-between">
+							<div>
+								<h5 class="card-title">Total Clients</h5>
+								<h2 class="mb-0" th:text="${stats.totalClients}">0</h2>
+							</div>
+							<div class="align-self-center">
+								<i class="ti ti-users fa-2x opacity-50"></i>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
 
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card bg-info text-white">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h5 class="card-title">Nouveaux (7j)</h5>
-                                    <h2 class="mb-0" th:text="${stats.nouveauxClients}">0</h2>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="ti ti-user-plus fa-2x opacity-50"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+			<div class="col-xl-3 col-md-6 mb-4">
+				<div class="card bg-success text-white">
+					<div class="card-body">
+						<div class="d-flex justify-content-between">
+							<div>
+								<h5 class="card-title">Clients Actifs</h5>
+								<h2 class="mb-0" th:text="${stats.clientsActifs}">0</h2>
+							</div>
+							<div class="align-self-center">
+								<i class="ti ti-user-check fa-2x opacity-50"></i>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
 
-            <!-- FILTRES ET RECHERCHE -->
-            <div class="card mb-4">
-                <div class="card-body">
-                    <form th:action="@{/clients}" method="get" class="row g-3 align-items-end">
-                        <div class="col-md-3">
-                            <label class="form-label fw-semibold">Recherche</label>
-                            <input type="text" name="search" th:value="${param.search}" 
-                                   class="form-control" placeholder="Nom, email, entreprise...">
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label fw-semibold">Statut</label>
-                            <select name="statut" class="form-select">
-                                <option value="">Tous</option>
-                                <option value="PROSPECT" th:selected="${param.statut == 'PROSPECT'}">Prospect</option>
-                                <option value="CLIENT" th:selected="${param.statut == 'CLIENT'}">Client</option>
-                                <option value="INACTIF" th:selected="${param.statut == 'INACTIF'}">Inactif</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label fw-semibold">Type</label>
-                            <select name="type" class="form-select">
-                                <option value="">Tous</option>
-                                <option th:each="type : ${typeClients}" 
-                                        th:value="${type}"
-                                        th:text="${type}"
-                                        th:selected="${param.type == type}">
-                                </option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label fw-semibold">Tri par</label>
-                            <select name="sort" class="form-select">
-                                <option value="dateCreation" th:selected="${param.sort == 'dateCreation'}">Date création</option>
-                                <option value="nom" th:selected="${param.sort == 'nom'}">Nom</option>
-                                <option value="entreprise" th:selected="${param.sort == 'entreprise'}">Entreprise</option>
-                                <option value="score" th:selected="${param.sort == 'score'}">Score</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class="ti ti-filter me-2"></i>Filtrer
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+			<div class="col-xl-3 col-md-6 mb-4">
+				<div class="card bg-warning text-white">
+					<div class="card-body">
+						<div class="d-flex justify-content-between">
+							<div>
+								<h5 class="card-title">Prospects</h5>
+								<h2 class="mb-0" th:text="${stats.prospects}">0</h2>
+							</div>
+							<div class="align-self-center">
+								<i class="ti ti-user-search fa-2x opacity-50"></i>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
 
-            <!-- TABLEAU DES CLIENTS -->
-            <div class="card">
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Client</th>
-                                    <th>Contact</th>
-                                    <th>Entreprise</th>
-                                    <th>Statut</th>
-                                    <th>Score</th>
-                                    <th>Dernière activité</th>
-                                    <th class="text-end">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr th:each="client : ${clients.content}" th:classappend="${client.statut == 'INACTIF'} ? 'table-secondary'">
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" 
-                                                 style="width: 40px; height: 40px; font-size: 14px; font-weight: bold;">
-                                                <span th:text="${#strings.substring(client.prenom, 0, 1) + #strings.substring(client.nom, 0, 1)}"></span>
-                                            </div>
-                                            <div>
-                                                <div class="fw-bold" th:text="${client.prenom + ' ' + client.nom}"></div>
-                                                <small class="text-muted" th:text="${client.typeClient}"></small>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div th:text="${client.email}"></div>
-                                        <small class="text-muted" th:text="${client.telephone ?: 'Non renseigné'}"></small>
-                                    </td>
-                                    <td>
-                                        <span th:if="${client.entreprise}" th:text="${client.entreprise}"></span>
-                                        <span th:unless="${client.entreprise}" class="text-muted">-</span>
-                                    </td>
-                                    <td>
-                                        <span th:classappend="'badge bg-' + 
+			<div class="col-xl-3 col-md-6 mb-4">
+				<div class="card bg-info text-white">
+					<div class="card-body">
+						<div class="d-flex justify-content-between">
+							<div>
+								<h5 class="card-title">Nouveaux (7j)</h5>
+								<h2 class="mb-0" th:text="${stats.nouveauxClients}">0</h2>
+							</div>
+							<div class="align-self-center">
+								<i class="ti ti-user-plus fa-2x opacity-50"></i>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- FILTRES ET RECHERCHE -->
+		<div class="card mb-4">
+			<div class="card-body">
+				<form th:action="@{/clients}" method="get"
+					class="row g-3 align-items-end">
+					<div class="col-md-3">
+						<label class="form-label fw-semibold">Recherche</label> <input
+							type="text" name="search" th:value="${param.search}"
+							class="form-control" placeholder="Nom, email, entreprise...">
+					</div>
+					<div class="col-md-2">
+						<label class="form-label fw-semibold">Statut</label> <select
+							name="statut" class="form-select">
+							<option value="">Tous</option>
+							<option value="PROSPECT"
+								th:selected="${param.statut == 'PROSPECT'}">Prospect</option>
+							<option value="CLIENT" th:selected="${param.statut == 'CLIENT'}">Client</option>
+							<option value="INACTIF"
+								th:selected="${param.statut == 'INACTIF'}">Inactif</option>
+						</select>
+					</div>
+					<div class="col-md-2">
+						<label class="form-label fw-semibold">Type</label> <select
+							name="type" class="form-select">
+							<option value="">Tous</option>
+							<option th:each="type : ${typeClients}" th:value="${type}"
+								th:text="${type}" th:selected="${param.type == type}">
+							</option>
+						</select>
+					</div>
+					<div class="col-md-2">
+						<label class="form-label fw-semibold">Tri par</label> <select
+							name="sort" class="form-select">
+							<option value="dateCreation"
+								th:selected="${param.sort == 'dateCreation'}">Date
+								création</option>
+							<option value="nom" th:selected="${param.sort == 'nom'}">Nom</option>
+							<option value="entreprise"
+								th:selected="${param.sort == 'entreprise'}">Entreprise</option>
+							<option value="score" th:selected="${param.sort == 'score'}">Score</option>
+						</select>
+					</div>
+					<div class="col-md-3">
+						<button type="submit" class="btn btn-primary w-100">
+							<i class="ti ti-filter me-2"></i>Filtrer
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<!-- TABLEAU DES CLIENTS -->
+		<div class="card">
+			<div class="card-body">
+				<div class="table-responsive">
+					<table class="table table-hover align-middle">
+						<thead class="table-light">
+							<tr>
+								<th>Client</th>
+								<th>Contact</th>
+								<th>Entreprise</th>
+								<th>Statut</th>
+								<th>Score</th>
+								<th>Dernière activité</th>
+								<th class="text-end">Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="client : ${clients.content}"
+								th:classappend="${client.statut == 'INACTIF'} ? 'table-secondary'">
+								<td>
+									<div class="d-flex align-items-center">
+										<div
+											class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3"
+											style="width: 40px; height: 40px; font-size: 14px; font-weight: bold;">
+											<span
+												th:text="${#strings.substring(client.prenom, 0, 1) + #strings.substring(client.nom, 0, 1)}"></span>
+										</div>
+										<div>
+											<div class="fw-bold"
+												th:text="${client.prenom + ' ' + client.nom}"></div>
+											<small class="text-muted" th:text="${client.typeClient}"></small>
+										</div>
+									</div>
+								</td>
+								<td>
+									<div th:text="${client.email}"></div> <small class="text-muted"
+									th:text="${client.telephone ?: 'Non renseigné'}"></small>
+								</td>
+								<td><span th:if="${client.entreprise}"
+									th:text="${client.entreprise}"></span> <span
+									th:unless="${client.entreprise}" class="text-muted">-</span></td>
+								<td><span
+									th:classappend="'badge bg-' + 
                                             ${client.statut == 'CLIENT' ? 'success' : 
                                               client.statut == 'PROSPECT' ? 'warning' : 'secondary'}"
-                                            th:text="${client.statut}">
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="progress flex-grow-1 me-2" style="height: 6px;">
-                                                <div th:classappend="'progress-bar ' + 
+									th:text="${client.statut}"> </span></td>
+								<td>
+									<div class="d-flex align-items-center">
+										<div class="progress flex-grow-1 me-2" style="height: 6px;">
+											<div
+												th:classappend="'progress-bar ' + 
                                                     ${client.scoreProspect >= 8 ? 'bg-success' : 
                                                       client.scoreProspect >= 5 ? 'bg-warning' : 'bg-danger'}"
-                                                    th:style="'width: ' + ${client.scoreProspect * 10} + '%;'">
-                                                </div>
-                                            </div>
-                                            <small th:text="${client.scoreProspect}"></small>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <small class="text-muted" 
-                                               th:text="${#temporals.format(client.dateModification, 'dd/MM/yyyy')}"></small>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex justify-content-end gap-1">
-                                            <!-- Voir -->
-                                            <a th:href="@{/clients/{id}(id=${client.id})}" 
-                                               class="btn btn-sm btn-outline-primary"
-                                               title="Voir la fiche client">
-                                                <i class="ti ti-eye"></i>
-                                            </a>
-                                            <!-- Éditer -->
-                                            <a th:href="@{/clients/{id}/modifier(id=${client.id})}" 
-                                               class="btn btn-sm btn-outline-secondary"
-                                               title="Modifier le client">
-                                                <i class="ti ti-edit"></i>
-                                            </a>
-                                            <!-- Opportunité -->
-                                            <a th:href="@{/opportunites/creer(clientId=${client.id})}" 
-                                               class="btn btn-sm btn-outline-success"
-                                               title="Créer une opportunité">
-                                                <i class="ti ti-bullseye"></i>
-                                            </a>
-                                            <!-- Menu déroulant -->
-                                            <div class="dropdown">
-                                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
-                                                        type="button" data-bs-toggle="dropdown">
-                                                    <i class="ti ti-dots-vertical"></i>
-                                                </button>
-                                                <ul class="dropdown-menu dropdown-menu-end">
-                                                    <li>
-                                                        <a class="dropdown-item" 
-                                                           th:href="@{/taches/creer(clientId=${client.id})}">
-                                                            <i class="ti ti-calendar-plus me-2"></i>Créer une tâche
-                                                        </a>
-                                                    </li>
-                                                    <li>
-                                                        <a class="dropdown-item" 
-                                                           th:href="@{/interactions/creer(clientId=${client.id})}">
-                                                            <i class="ti ti-message-circle me-2"></i>Ajouter une interaction
-                                                        </a>
-                                                    </li>
-                                                    <li><hr class="dropdown-divider"></li>
-                                                    <li>
-                                                        <form th:action="@{/clients/{id}/supprimer(id=${client.id})}" 
-                                                              method="post" class="d-inline">
-                                                            <button type="submit" class="dropdown-item text-danger" 
-                                                                    onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce client ?')">
-                                                                <i class="ti ti-trash me-2"></i>Supprimer
-                                                            </button>
-                                                        </form>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                
-                                <!-- Message si aucun client -->
-                                <tr th:if="${clients.empty}">
-                                    <td colspan="7" class="text-center py-4">
-                                        <i class="ti ti-users text-muted" style="font-size: 3rem;"></i>
-                                        <h5 class="text-muted mt-2">Aucun client trouvé</h5>
-                                        <p class="text-muted">Commencez par ajouter votre premier client</p>
-                                        <a th:href="@{/clients/ajouter}" class="btn btn-primary">
-                                            <i class="ti ti-user-plus me-2"></i>Ajouter un client
-                                        </a>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+												th:style="'width: ' + ${client.scoreProspect * 10} + '%;'">
+											</div>
+										</div>
+										<small th:text="${client.scoreProspect}"></small>
+									</div>
+								</td>
+								<td><small class="text-muted"
+									th:text="${#temporals.format(client.dateModification, 'dd/MM/yyyy')}"></small>
+								</td>
+								<td>
+									<div class="d-flex justify-content-end gap-1">
+										<!-- Voir -->
+										<a th:href="@{/clients/{id}(id=${client.id})}"
+											class="btn btn-sm btn-outline-primary"
+											title="Voir la fiche client"> <i class="ti ti-eye"></i>
+										</a>
+										<!-- Éditer -->
+										<a th:href="@{/clients/{id}/modifier(id=${client.id})}"
+											class="btn btn-sm btn-outline-secondary"
+											title="Modifier le client"> <i class="ti ti-edit"></i>
+										</a>
 
-                    <!-- PAGINATION -->
-                    <div th:if="${clients.totalPages > 1}" class="d-flex justify-content-between align-items-center mt-4">
-                        <div class="text-muted">
-                            Affichage de 
-                            <span th:text="${clients.number * clients.size + 1}"></span>
-                            à 
-                            <span th:text="${clients.number * clients.size + clients.numberOfElements}"></span>
-                            sur 
-                            <span th:text="${clients.totalElements}"></span> clients
-                        </div>
-                        <nav>
-                            <ul class="pagination mb-0">
-                                <li class="page-item" th:classappend="${clients.first} ? 'disabled'">
-                                    <a class="page-link" th:href="@{/clients(page=0, size=${clients.size}, search=${param.search}, statut=${param.statut}, type=${param.type}, sort=${param.sort})}">
-                                        Premier
-                                    </a>
-                                </li>
-                                <li class="page-item" th:classappend="${clients.first} ? 'disabled'">
-                                    <a class="page-link" th:href="@{/clients(page=${clients.number-1}, size=${clients.size}, search=${param.search}, statut=${param.statut}, type=${param.type}, sort=${param.sort})}">
-                                        Précédent
-                                    </a>
-                                </li>
-                                
-                                <li th:each="page : ${#numbers.sequence(0, clients.totalPages-1)}" 
-                                    class="page-item" th:classappend="${page == clients.number} ? 'active'">
-                                    <a class="page-link" 
-                                       th:href="@{/clients(page=${page}, size=${clients.size}, search=${param.search}, statut=${param.statut}, type=${param.type}, sort=${param.sort})}"
-                                       th:text="${page + 1}">
-                                    </a>
-                                </li>
-                                
-                                <li class="page-item" th:classappend="${clients.last} ? 'disabled'">
-                                    <a class="page-link" th:href="@{/clients(page=${clients.number+1}, size=${clients.size}, search=${param.search}, statut=${param.statut}, type=${param.type}, sort=${param.sort})}">
-                                        Suivant
-                                    </a>
-                                </li>
-                                <li class="page-item" th:classappend="${clients.last} ? 'disabled'">
-                                    <a class="page-link" th:href="@{/clients(page=${clients.totalPages-1}, size=${clients.size}, search=${param.search}, statut=${param.statut}, type=${param.type}, sort=${param.sort})}">
-                                        Dernier
-                                    </a>
-                                </li>
-                            </ul>
-                        </nav>
-                    </div>
-                </div>
-            </div>
+										<!-- Menu déroulant -->
+										<div class="dropdown">
+											<button
+												class="btn btn-sm btn-outline-secondary dropdown-toggle"
+												type="button" data-bs-toggle="dropdown">
+												<i class="ti ti-dots-vertical"></i>
+											</button>
+											<ul class="dropdown-menu dropdown-menu-end">
+												<li><a class="dropdown-item"
+													th:href="@{/taches/creer(clientId=${client.id})}"> <i
+														class="ti ti-calendar-plus me-2"></i>Créer une tâche
+												</a></li>
+												<li><a
+													th:href="@{/opportunitees/ajouter(clientId=${client.id})}"
+													class="dropdown-item"
+													> 
+													<i class="ti ti-cash"></i>Ajouter Opportunitée
+												</a></li>
+												<li><a class="dropdown-item"
+													th:href="@{/interactions/creer(clientId=${client.id})}">
+														<i class="ti ti-message-circle me-2"></i>Ajouter une
+														interaction
+												</a></li>
+												<li><hr class="dropdown-divider"></li>
+												<li>
+													<form
+														th:action="@{/clients/{id}/supprimer(id=${client.id})}"
+														method="post" class="d-inline">
+														<button type="submit" class="dropdown-item text-danger"
+															onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce client ?')">
+															<i class="ti ti-trash me-2"></i>Supprimer
+														</button>
+													</form>
+												</li>
+											</ul>
+										</div>
+									</div>
+								</td>
+							</tr>
 
-        </div>
-    </div>
+							<!-- Message si aucun client -->
+							<tr th:if="${clients.empty}">
+								<td colspan="7" class="text-center py-4"><i
+									class="ti ti-users text-muted" style="font-size: 3rem;"></i>
+									<h5 class="text-muted mt-2">Aucun client trouvé</h5>
+									<p class="text-muted">Commencez par ajouter votre premier
+										client</p> <a th:href="@{/clients/ajouter}"
+									class="btn btn-primary"> <i class="ti ti-user-plus me-2"></i>Ajouter
+										un client
+								</a></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+
+				<!-- PAGINATION -->
+				<div th:if="${clients.totalPages > 1}"
+					class="d-flex justify-content-between align-items-center mt-4">
+					<div class="text-muted">
+						Affichage de <span th:text="${clients.number * clients.size + 1}"></span>
+						à <span
+							th:text="${clients.number * clients.size + clients.numberOfElements}"></span>
+						sur <span th:text="${clients.totalElements}"></span> clients
+					</div>
+					<nav>
+						<ul class="pagination mb-0">
+							<li class="page-item"
+								th:classappend="${clients.first} ? 'disabled'"><a
+								class="page-link"
+								th:href="@{/clients(page=0, size=${clients.size}, search=${param.search}, statut=${param.statut}, type=${param.type}, sort=${param.sort})}">
+									Premier </a></li>
+							<li class="page-item"
+								th:classappend="${clients.first} ? 'disabled'"><a
+								class="page-link"
+								th:href="@{/clients(page=${clients.number-1}, size=${clients.size}, search=${param.search}, statut=${param.statut}, type=${param.type}, sort=${param.sort})}">
+									Précédent </a></li>
+
+							<li
+								th:each="page : ${#numbers.sequence(0, clients.totalPages-1)}"
+								class="page-item"
+								th:classappend="${page == clients.number} ? 'active'"><a
+								class="page-link"
+								th:href="@{/clients(page=${page}, size=${clients.size}, search=${param.search}, statut=${param.statut}, type=${param.type}, sort=${param.sort})}"
+								th:text="${page + 1}"> </a></li>
+
+							<li class="page-item"
+								th:classappend="${clients.last} ? 'disabled'"><a
+								class="page-link"
+								th:href="@{/clients(page=${clients.number+1}, size=${clients.size}, search=${param.search}, statut=${param.statut}, type=${param.type}, sort=${param.sort})}">
+									Suivant </a></li>
+							<li class="page-item"
+								th:classappend="${clients.last} ? 'disabled'"><a
+								class="page-link"
+								th:href="@{/clients(page=${clients.totalPages-1}, size=${clients.size}, search=${param.search}, statut=${param.statut}, type=${param.type}, sort=${param.sort})}">
+									Dernier </a></li>
+						</ul>
+					</nav>
+				</div>
+			</div>
+		</div>
+
+	</div>
+</div>
 </html>

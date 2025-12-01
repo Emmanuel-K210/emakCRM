@@ -224,7 +224,6 @@ class FactureManager {
     }
 
     addLigneFacture() {
-		console.log("Viens d'etre cliquée.....!!");
         const template = document.getElementById('ligneTemplate');
         const clone = template.content.cloneNode(true);
         const ligneContainer = document.getElementById('lignesFacture');

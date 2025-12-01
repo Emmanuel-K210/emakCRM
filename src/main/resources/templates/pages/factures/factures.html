@@ -1,113 +1,246 @@
-<html lang="en" xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/layout"
-      layout:decorate="layout/layout">
-<body>
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/layout"
+    layout:decorate="layout/layout">
+ 
 <div layout:fragment="content">
-    <header class="d-flex justify-content-between align-items-center p-3 border-bottom">
-        <h2>Factures</h2>
-        <div class="d-flex align-items-center">
-            <input type="text" class="form-control form-control-sm me-2" placeholder="Rechercher...">
-            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#factureModal">+ Nouvelle facture</button>
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Gestion des Factures</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#factureModal">
+                <i class="ti ti-plus"></i> Nouvelle Facture
+            </button>
         </div>
-    </header>
-
-    <div class="table-responsive mt-3">
-        <table class="table table-hover align-middle mt-3">
-            <thead class="table-light">
-            <tr>
-                <th>Vente</th>
-                <th>Client</th>
-                <th>Montant</th>
-                <th>Date</th>
-                <th>Statut</th>
-                <th>Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="facture : ${facturesPage.content}">
-                <td th:text="${facture.venteId}">Vente</td>
-                <td th:text="${facture.clientNom}">Client</td>
-                <td th:text="${facture.montant}">0.00</td>
-                <td th:text="${facture.dateEmission}">2025-01-01</td>
-                <td><span th:text="${facture.statut}"
-                          th:classappend="${facture.statut}=='NON_PAYEE' ? 'badge bg-warning' : 'badge bg-success'">
-                    NON_PAYEE
-                </span></td>
-                <td>
-                    <a href="javascript:void(0);" th:onclick="'openEditModal(' + ${facture.id} + ')'" class="btn btn-sm btn-warning" title="Modifier">
-                        <i class="ti ti-pencil"></i>
-                    </a>
-                    <a href="javascript:void(0);" th:onclick="'confirmDelete(\'/factures/supprimer?id=' + ${facture.id} + '\')'" class="btn btn-sm btn-danger" title="Supprimer">
-                        <i class="ti ti-trash"></i>
-                    </a>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-
-        <nav aria-label="Page navigation" class="mt-3">
-            <ul class="pagination justify-content-center">
-                <li class="page-item" th:classappend="${facturesPage.first} ? 'disabled'">
-                    <a class="page-link" th:href="@{/factures(page=${facturesPage.number - 1})}">Précédent</a>
-                </li>
-                <li class="page-item" th:each="i : ${#numbers.sequence(0, facturesPage.totalPages -1)}"
-                    th:classappend="${i == facturesPage.number} ? 'active'">
-                    <a class="page-link" th:href="@{/factures(page=${i})}" th:text="${i + 1}">1</a>
-                </li>
-                <li class="page-item" th:classappend="${facturesPage.last} ? 'disabled'">
-                    <a class="page-link" th:href="@{/factures(page=${facturesPage.number + 1})}">Suivant</a>
-                </li>
-            </ul>
-        </nav>
     </div>
 
-    <!-- MODAL CREATION / EDIT FACTURE -->
-    <div class="modal fade" id="factureModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <form th:action="@{/factures/enregistrer}" method="post">
-                    <input type="hidden" name="id" id="factureId">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modalTitle">Nouvelle facture</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="venteId" class="form-label">Vente</label>
-                                <select class="form-select" id="venteId" name="venteId" required>
-                                    <option th:each="v : ${ventes}" th:value="${v.id}" th:text="${v.id}">Vente</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="clientId" class="form-label">Client</label>
-                                <select class="form-select" id="clientId" name="clientId" required>
-                                    <option th:each="c : ${clients}" th:value="${c.id}" th:text="${c.nom}">Client</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="montant" class="form-label">Montant</label>
-                                <input type="number" step="0.01" class="form-control" id="montant" name="montant" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="statut" class="form-label">Statut</label>
-                                <select class="form-select" id="statut" name="statut">
-                                    <option value="NON_PAYEE">NON_PAYEE</option>
-                                    <option value="PAYEE">PAYEE</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                        <button type="submit" class="btn btn-primary" id="submitBtn">Enregistrer</button>
-                    </div>
-                </form>
+    <!-- Alertes -->
+    <div id="alertContainer"></div>
+
+    <!-- Statistiques -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h6 class="card-title">Factures Emises</h6>
+                    <h3 id="countEmises" class="card-text">0</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h6 class="card-title">En Retard</h6>
+                    <h3 id="countRetard" class="card-text">0</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h6 class="card-title">Payées</h6>
+                    <h3 id="countPayees" class="card-text">0</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h6 class="card-title">Encaissements</h6>
+                    <h3 id="totalEncaissements" class="card-text">0 €</h3>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Filtres -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Statut</label>
+                    <select id="statutFilter" class="form-select">
+                        <option value="">Tous les statuts</option>
+                        <option value="BROUILLON">Brouillon</option>
+                        <option value="EMISE">Emise</option>
+                        <option value="EN_RETARD">En retard</option>
+                        <option value="PAYEE_PARTIELLEMENT">Payée partiellement</option>
+                        <option value="PAYEE">Payée</option>
+                        <option value="ANNULEE">Annulée</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Date de début</label>
+                    <input type="date" id="dateFromFilter" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Date de fin</label>
+                    <input type="date" id="dateToFilter" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">&nbsp;</label>
+                    <div>
+                        <button id="applyFilters" class="btn btn-primary">Filtrer</button>
+                        <button id="resetFilters" class="btn btn-secondary">Réinitialiser</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tableau -->
+    <div class="card">
+        <div class="card-body">
+            <table id="facturesTable" class="table table-striped table-hover" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>N° Facture</th>
+                        <th>Client</th>
+                        <th>Date</th>
+                        <th>Échéance</th>
+                        <th>Montant TTC</th>
+                        <th>Reste à payer</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+     <!-- Modal Facture -->
+    <div class="modal fade" id="factureModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nouvelle Facture</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="factureForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Client *</label>
+                                    <select name="idClient" class="form-select" required>
+                                        <option value="">Choisir un client...</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Devis (optionnel)</label>
+                                    <select name="idDevis" class="form-select">
+                                        <option value="">Choisir un devis...</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Date de facturation</label>
+                                    <input type="date" name="dateFacture" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Date d'échéance</label>
+                                    <input type="date" name="dateEcheance" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Taux TVA (%)</label>
+                                    <input type="number" name="tauxTva" class="form-control" value="20.00" step="0.01">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Lignes de facture -->
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6>Lignes de facture</h6>
+                                <button type="button" id="addLigne" class="btn btn-sm btn-outline-primary">
+                                    <i class="ti ti-plus"></i> Ajouter une ligne
+                                </button>
+                            </div>
+                            <div id="lignesFacture"></div>
+                        </div>
+
+                        <!-- Totaux -->
+                        <div class="row">
+                            <div class="col-md-4 offset-md-8">
+                                <table class="table table-sm">
+                                    <tr>
+                                        <td>Total HT:</td>
+                                        <td id="totalHT" class="text-end">0.00 €</td>
+                                    </tr>
+                                    <tr>
+                                        <td>TVA:</td>
+                                        <td id="totalTVA" class="text-end">0.00 €</td>
+                                    </tr>
+                                    <tr class="table-active">
+                                        <td><strong>Total TTC:</strong></td>
+                                        <td id="totalTTC" class="text-end"><strong>0.00 €</strong></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Notes</label>
+                            <textarea name="notes" class="form-control" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" form="factureForm" class="btn btn-primary">Créer la facture</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Template ligne facture -->
+    <template id="ligneTemplate">
+        <div class="ligne-facture border p-3 mb-3 rounded">
+            <div class="row g-2">
+                <div class="col-md-4">
+                    <label class="form-label">Produit</label>
+                    <select class="form-select produit-select" required>
+                        <option value="">Choisir un produit...</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Quantité</label>
+                    <input type="number" class="form-control quantite" min="1" value="1" required>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Prix unitaire HT</label>
+                    <input type="number" class="form-control prix-unitaire" step="0.01" required>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">TVA %</label>
+                    <input type="number" class="form-control taux-tva" value="20.00" step="0.01">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="button" class="btn btn-outline-danger remove-ligne w-100">
+                        <i class="ti ti-trash"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-md-12">
+                    <label class="form-label">Description</label>
+                    <input type="text" class="form-control description" placeholder="Description de la ligne...">
+                </div>
+            </div>
+        </div>
+    </template>
 </div>
-<script th:src="@{/ressources/js/factures.js}" defer></script>
-</body>
+
+<div layout:fragment="scripts">
+    <script th:src="@{/ressources/js/factures.js}"></script>
+</div>
 </html>

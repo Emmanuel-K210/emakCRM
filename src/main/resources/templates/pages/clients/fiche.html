@@ -56,7 +56,7 @@
 					<h6 class="mb-0">
 						<i class="fas fa-bullseye me-2"></i>Opportunités
 					</h6>
-					<button class="btn btn-sm btn-light">Nouvelle</button>
+					<a th:href="@{/opportunitees/ajouter(clientId=${client.id})}" class="btn btn-sm btn-light">Nouvelle</a>
 				</div>
 				<div class="card-body">
 					<div class="table-responsive">
@@ -78,7 +78,7 @@
 									<td>
 										<div class="progress" style="height: 8px;">
 											<div class="progress-bar bg-warning" th:style="'width:'+${opp.probabilite}+'%'"></div>
-										</div> <small th:text="${probabilite*10}">70%</small>
+										</div> <small th:text="${opp.probabilite}">70%</small>
 									</td>
 									<td th:text="${opp.dateCloturePrevue}">15/12/2024</td>
 								</tr>

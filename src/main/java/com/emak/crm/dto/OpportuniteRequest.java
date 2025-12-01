@@ -3,9 +3,12 @@ package com.emak.crm.dto;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 
+@Builder
 public record OpportuniteRequest(
     @NotBlank String nomOpportunite,
     String etapeVente,
