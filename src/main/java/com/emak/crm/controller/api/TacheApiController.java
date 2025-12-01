@@ -1,4 +1,4 @@
-package com.emak.crm.controller;
+package com.emak.crm.controller.api;
 
 import java.util.List;
 import java.util.Map;

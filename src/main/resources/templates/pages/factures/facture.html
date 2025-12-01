@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/layout"
+    layout:decorate="layout/layout">
+ 
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Détail de la Facture</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <button id="printFacture" class="btn btn-outline-secondary me-2">
+                <i class="ti ti-printer"></i> Imprimer
+            </button>
+            <button id="exportPdf" class="btn btn-outline-danger">
+                <i class="ti ti-file-type-pdf"></i> PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Alertes -->
+    <div id="alertContainer"></div>
+
+    <!-- En-tête Facture -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h4 id="factureNumero" class="text-primary">Chargement...</h4>
+                    <div id="factureClient" class="mb-2"></div>
+                    <div id="factureDates" class="text-muted small"></div>
+                </div>
+                <div class="col-md-6 text-end">
+                    <div id="factureStatut" class="mb-2"></div>
+                    <div id="factureTotaux" class="h5"></div>
+                    <div id="factureRestant" class="text-danger"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Détails de la facture -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Lignes de facture</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Produit</th>
+                                    <th>Description</th>
+                                    <th class="text-end">Quantité</th>
+                                    <th class="text-end">Prix unitaire</th>
+                                    <th class="text-end">Total HT</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lignesFactureBody">
+                                <!-- Rempli dynamiquement -->
+                            </tbody>
+                            <tfoot id="factureTotauxFoot">
+                                <!-- Rempli dynamiquement -->
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Notes</h5>
+                </div>
+                <div class="card-body">
+                    <p id="factureNotes" class="mb-0">Aucune note</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Paiements et Actions -->
+        <div class="col-md-4">
+            <!-- Paiements -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Paiements</h5>
+                    <button id="addPaiementBtn" class="btn btn-sm btn-primary">
+                        <i class="ti ti-plus"></i> Ajouter
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="paiementsList">
+                        <!-- Rempli dynamiquement -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button id="sendFactureBtn" class="btn btn-outline-success">
+                            <i class="ti ti-send"></i> Envoyer au client
+                        </button>
+                        <button id="cancelFactureBtn" class="btn btn-outline-danger">
+                            <i class="ti ti-x"></i> Annuler la facture
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div layout:fragment="scripts">
+    <!-- Modal Paiement -->
+    <div class="modal fade" id="paiementModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nouveau Paiement</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="paiementForm">
+                        <input type="hidden" id="factureIdPaiement">
+                        <div class="mb-3">
+                            <label class="form-label">Date du paiement</label>
+                            <input type="date" name="datePaiement" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Montant *</label>
+                            <input type="number" name="montant" class="form-control" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Mode de paiement *</label>
+                            <select name="modePaiement" class="form-select" required>
+                                <option value="">Choisir un mode...</option>
+                                <option value="CARTE">Carte bancaire</option>
+                                <option value="VIREMENT">Virement</option>
+                                <option value="CHEQUE">Chèque</option>
+                                <option value="ESPECES">Espèces</option>
+                                <option value="PRELEVEMENT">Prélèvement</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Référence transaction</label>
+                            <input type="text" name="referenceTransaction" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Libellé *</label>
+                            <input type="text" name="libelle" class="form-control" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" form="paiementForm" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/ressources/js/facture-detail.js"></script>
+</div>
+</html>

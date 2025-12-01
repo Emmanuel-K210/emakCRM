@@ -4,6 +4,7 @@ import com.emak.crm.dto.OpportuniteRequest;
 import com.emak.crm.dto.OpportuniteResponse;
 import com.emak.crm.entity.Opportunite;
 import com.emak.crm.exception.EntityNotFound;
+import com.emak.crm.service.ClientService;
 import com.emak.crm.service.OpportuniteService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -15,11 +16,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-@RequestMapping("/opportunites")
+@RequestMapping("/opportunitees")
 @AllArgsConstructor
 public class OpportuniteController {
 
     private final OpportuniteService opportuniteService;
+    private final ClientService clientService;
 
     @GetMapping
     public String listeOpportunites(Model model,
@@ -34,19 +36,28 @@ public class OpportuniteController {
 
         return "pages/opportunite/liste.html";
     }
-
+    
     @GetMapping("/ajouter")
-    public String formAjouter(Model model) {
-        model.addAttribute("opportunite", new Opportunite());
-        model.addAttribute("pageActive", "opportunites");
-        return "pages/opportunite/form.html";
+    public String formAjouter(Model model,@RequestParam(name="clientId")Long clientId,RedirectAttributes attributes) {
+    	var opp = OpportuniteRequest.builder().build();
+    	try {
+			var client = clientService.findById(clientId);
+			model.addAttribute("opportunite",opp);
+	        model.addAttribute("pageActive", "opportunites");
+			model.addAttribute("client", client);
+			return "pages/opportunitees/form.html";
+		} catch (EntityNotFound e) {
+			attributes.addFlashAttribute("messageError", e.getMessage());
+			return "redirect:/clients";
+		}
+    	
     }
 
     @PostMapping("/ajouter")
     public String ajouter(@ModelAttribute OpportuniteRequest opportunite, RedirectAttributes redirectAttributes) {
         opportuniteService.save(opportunite);
         redirectAttributes.addFlashAttribute("success", "✅ Opportunité ajoutée avec succès !");
-        return "redirect:/opportunites";
+        return "redirect:/opportunitees";
     }
 
     @GetMapping("/modifier/{id}")
@@ -61,7 +72,7 @@ public class OpportuniteController {
 			return null;
 		}
       
-        return "pages/opportunite/form.html";
+        return "pages/opportunitees/form.html";
     }
 
     @PostMapping("/modifier/{id}")

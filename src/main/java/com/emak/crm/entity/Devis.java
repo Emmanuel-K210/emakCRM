@@ -63,7 +63,7 @@ public class Devis {
     @Builder.Default
     private StatutDevis statut = StatutDevis.BROUILLON;
     
-    @Column(length = 1000,name="condition_generales")
+    @Column(length = 1000,name="conditions_generales")
     private String conditionsGenerales;
     
     @Column(length = 500)

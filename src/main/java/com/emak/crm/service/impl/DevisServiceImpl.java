@@ -243,6 +243,15 @@ public class DevisServiceImpl implements DevisService {
         }
     }
     
+    @Override
+    public List<DevisResponse> findByDevisConvertible(){
+    	return devisRepository.findAll()
+    			.stream()
+    			.filter(this::peutEtreConvertiEnFacture)
+    			.map(DevisMapper::toResponse)
+    			.toList();
+    }
+    
     
     /**
      * SUPPRESSION DEVIS
