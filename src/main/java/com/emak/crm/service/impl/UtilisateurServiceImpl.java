@@ -7,6 +7,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import com.emak.crm.dto.UtilisateurRequest;
 import com.emak.crm.dto.UtilisateurResponse;
 import com.emak.crm.entity.Utilisateur;
@@ -25,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 public class UtilisateurServiceImpl implements UtilisateurService {
 
     private final UtilisateurRepository utilisateurRepository;
+    private final PasswordEncoder passwordEncoder;
 
     private Utilisateur getById(Number id) throws EntityNotFound {
         return utilisateurRepository.findById((long) id)
@@ -53,7 +56,9 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     
     @Override
     public UtilisateurResponse save(UtilisateurRequest request) {
-        return UtilisateurMapper.toResponse(utilisateurRepository.save(UtilisateurMapper.toEntity(request)));
+        Utilisateur utilisateur = UtilisateurMapper.toEntity(request);
+        utilisateur.setMotPasse(passwordEncoder.encode(request.motPasse()));
+        return UtilisateurMapper.toResponse(utilisateurRepository.save(utilisateur));
     }
     
     
@@ -89,7 +94,9 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         utilisateur.setNom(request.nom());
         utilisateur.setPrenom(request.prenom());
         utilisateur.setEmail(request.email());
-        utilisateur.setMotPasse(request.motPasse());
+        if (request.motPasse() != null && !request.motPasse().isBlank()) {
+            utilisateur.setMotPasse(passwordEncoder.encode(request.motPasse()));
+        }
         utilisateur.setRole(Roles.of(request.role()));
         utilisateur.setEquipe(request.equipe());
         utilisateur.setDateEmbauche(LocalDate.parse(request.dateEmbauche()));

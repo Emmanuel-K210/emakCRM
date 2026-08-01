@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/layout"
+	layout:decorate="layout/layout">
+<div layout:fragment="content">
+
+	<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+		<h1 class="h2">
+			<i class="ti ti-user-edit me-2"></i>Modifier
+			<span th:text="${client.nom + ' ' + client.prenom}">Jean Martin</span>
+		</h1>
+		<a th:href="@{/clients/{id}(id=${client.id})}" class="btn btn-outline-secondary">
+			<i class="ti ti-arrow-left me-2"></i>Retour à la fiche
+		</a>
+	</div>
+
+	<div class="card">
+		<div class="card-body">
+			<form th:action="@{/clients/{id}/modifier(id=${client.id})}" th:object="${client}" method="post">
+
+				<h5 class="card-title text-primary mb-3">
+					<i class="ti ti-id-badge me-2"></i>Informations de base
+				</h5>
+				<div class="row g-3 mb-4">
+					<div class="col-md-6">
+						<label class="form-label fw-semibold">Nom *</label>
+						<input type="text" th:field="*{nom}" class="form-control" required>
+					</div>
+					<div class="col-md-6">
+						<label class="form-label fw-semibold">Prénom</label>
+						<input type="text" th:field="*{prenom}" class="form-control">
+					</div>
+					<div class="col-md-6">
+						<label class="form-label fw-semibold">Email *</label>
+						<input type="email" th:field="*{email}" class="form-control" required>
+					</div>
+					<div class="col-md-6">
+						<label class="form-label fw-semibold">Téléphone</label>
+						<input type="tel" th:field="*{telephone}" class="form-control">
+					</div>
+				</div>
+
+				<h5 class="card-title text-primary mb-3">
+					<i class="ti ti-building me-2"></i>Entreprise
+				</h5>
+				<div class="row g-3 mb-4">
+					<div class="col-md-8">
+						<label class="form-label fw-semibold">Entreprise</label>
+						<input type="text" th:field="*{entreprise}" class="form-control">
+					</div>
+					<div class="col-md-4">
+						<label class="form-label fw-semibold">Fonction</label>
+						<input type="text" th:field="*{fonction}" class="form-control">
+					</div>
+					<div class="col-md-6">
+						<label class="form-label fw-semibold">Site web</label>
+						<input type="url" th:field="*{siteWeb}" class="form-control">
+					</div>
+					<div class="col-md-3">
+						<label class="form-label fw-semibold">Secteur d'activité</label>
+						<select th:field="*{secteurActivite}" class="form-select">
+							<option value="">Sélectionner...</option>
+							<option value="IT">Informatique / Tech</option>
+							<option value="COMMERCE">Commerce</option>
+							<option value="SERVICES">Services</option>
+							<option value="INDUSTRIE">Industrie</option>
+							<option value="SANTE">Santé</option>
+							<option value="AUTRE">Autre</option>
+						</select>
+					</div>
+					<div class="col-md-3">
+						<label class="form-label fw-semibold">Type de client</label>
+						<select th:field="*{typeClient}" class="form-select">
+							<option th:each="t : ${typeClient}" th:value="${t.name()}" th:text="${t.name()}"></option>
+						</select>
+					</div>
+				</div>
+
+				<h5 class="card-title text-primary mb-3">
+					<i class="ti ti-map-pin me-2"></i>Localisation
+				</h5>
+				<div class="row g-3 mb-4">
+					<div class="col-md-8">
+						<label class="form-label fw-semibold">Adresse</label>
+						<input type="text" th:field="*{adresse}" class="form-control">
+					</div>
+					<div class="col-md-4">
+						<label class="form-label fw-semibold">Code postal</label>
+						<input type="text" th:field="*{codePostal}" class="form-control">
+					</div>
+					<div class="col-md-6">
+						<label class="form-label fw-semibold">Ville</label>
+						<input type="text" th:field="*{ville}" class="form-control">
+					</div>
+					<div class="col-md-6">
+						<label class="form-label fw-semibold">Pays</label>
+						<input type="text" th:field="*{pays}" class="form-control">
+					</div>
+				</div>
+
+				<h5 class="card-title text-primary mb-3">
+					<i class="ti ti-notes me-2"></i>Informations complémentaires
+				</h5>
+				<div class="row g-3 mb-4">
+					<div class="col-md-6">
+						<label class="form-label fw-semibold">Source du prospect</label>
+						<select th:field="*{origine}" class="form-select">
+							<option th:each="o : ${origineClient}" th:value="${o.name()}" th:text="${o.name()}"></option>
+						</select>
+					</div>
+					<div class="col-md-6">
+						<label class="form-label fw-semibold">Score de prospection</label>
+						<div class="d-flex align-items-center gap-3">
+							<input type="range" th:field="*{scoreProspect}" class="form-range" min="1" max="10"
+								oninput="document.getElementById('scoreDisplay').textContent = this.value">
+							<span id="scoreDisplay" class="badge bg-primary" th:text="${client.scoreProspect}">5</span>
+						</div>
+					</div>
+					<div class="col-12">
+						<label class="form-label fw-semibold">Notes</label>
+						<textarea th:field="*{notes}" class="form-control" rows="3"></textarea>
+					</div>
+				</div>
+
+				<div class="mt-4 pt-3 border-top d-flex justify-content-end gap-2">
+					<a th:href="@{/clients/{id}(id=${client.id})}" class="btn btn-outline-secondary">Annuler</a>
+					<button type="submit" class="btn btn-success">
+						<i class="ti ti-check me-2"></i>Enregistrer les modifications
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+</html>

@@ -63,38 +63,47 @@ public class CampagneServiceImpl implements CampagneService{
 	 */
 	@Override
 	public CampagneResponse save(CampagneRequest requete) {
-		Optional<Utilisateur> utilisateur = utilisateurRepository.findById(requete.getUtilisateurResponsableId()); 
+		Utilisateur utilisateur = utilisateurRepository.findById(requete.getUtilisateurResponsableId())
+				.orElseThrow(() -> new IllegalArgumentException("Aucun responsable trouvé avec l'ID: " + requete.getUtilisateurResponsableId()));
 		Campagne campagne = CampagneMapper.toEntity(requete);
-		if(!utilisateur.isPresent()) {
-			EntityNotFound.of("Aucun Responsable n'a été trouvé");
-		}
-		campagne.setUtilisateurResponsable(utilisateur.get());
-		
+		campagne.setUtilisateurResponsable(utilisateur);
+
 		return CampagneMapper.toResponseDTO(campagneRepository.save(campagne));
 	}
 
 	@Override
 	public CampagneResponse findById(Number id) throws EntityNotFound {
-		// TODO Auto-generated method stub
-		return null;
+		Campagne campagne = campagneRepository.findById(id.longValue())
+				.orElseThrow(() -> EntityNotFound.of("Campagne non trouvée avec l'ID: " + id));
+		return CampagneMapper.toResponseDTO(campagne);
 	}
 
 	@Override
 	public void deleteById(Number id) throws EntityNotFound {
-		// TODO Auto-generated method stub
-		
+		Campagne campagne = campagneRepository.findById(id.longValue())
+				.orElseThrow(() -> EntityNotFound.of("Campagne non trouvée avec l'ID: " + id));
+		campagneRepository.delete(campagne);
 	}
 
 	@Override
 	public CampagneResponse update(Number id, CampagneRequest requete) throws EntityNotFound {
-		
-		return null;
+		Campagne campagne = campagneRepository.findById(id.longValue())
+				.orElseThrow(() -> EntityNotFound.of("Campagne non trouvée avec l'ID: " + id));
+
+		CampagneMapper.updateEntityFromDTO(requete, campagne);
+
+		if (requete.getUtilisateurResponsableId() != null) {
+			Utilisateur utilisateur = utilisateurRepository.findById(requete.getUtilisateurResponsableId())
+					.orElseThrow(() -> EntityNotFound.of("Aucun responsable trouvé avec l'ID: " + requete.getUtilisateurResponsableId()));
+			campagne.setUtilisateurResponsable(utilisateur);
+		}
+
+		return CampagneMapper.toResponseDTO(campagneRepository.save(campagne));
 	}
 
 	@Override
 	public Page<CampagneResponse> findAll(Pageable spageable) {
-		// TODO Auto-generated method stub
-		return null;
+		return campagneRepository.findAll(spageable).map(CampagneMapper::toResponseDTO);
 	}
 		
 	/**

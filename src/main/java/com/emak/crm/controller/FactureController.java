@@ -23,15 +23,4 @@ public class FactureController {
         model.addAttribute("factureId", id);
         return "pages/factures/facture";
     }
-
-    @GetMapping("/nouveau")
-    public String newFacture() {
-        return "pages/factures/form";
-    }
-
-    @GetMapping("/{id}/editer")
-    public String editFacture(@PathVariable Long id, Model model) {
-        model.addAttribute("factureId", id);
-        return "pages/factures/form";
-    }
 }

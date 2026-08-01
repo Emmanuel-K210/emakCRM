@@ -1,104 +1,124 @@
-<div class="card">
-    <div class="card-body">
-      <form th:action="@{/opportunites/ajouter}" th:object="${opportunite}" method="post">
-        
-        <!-- CONTEXTE CLAIR -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-          <div>
-            <h4 class="text-primary mb-1">
-              <i class="ti ti-bullseye me-2"></i>Nouvelle Opportunité
-            </h4>
-            <div class="d-flex align-items-center text-muted">
-              <i class="ti ti-user me-2"></i>
-              <span th:text="${client.prenom + ' ' + client.nom}"></span>
-              <span th:if="${client.entreprise}" th:text="' - ' + ${client.entreprise}"></span>
-              <span class="badge bg-light text-dark ms-2" th:text="'Score: ' + ${client.scoreProspect} + '/10'"></span>
-            </div>
-          </div>
-        </div>
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/layout"
+	layout:decorate="layout/layout">
 
-        <!-- INFORMATIONS CLIENT RAPIDES (Lecture seule) -->
-        <div class="row g-3 mb-4">
-          <div class="col-md-4">
-            <label class="form-label fw-semibold">Client</label>
-            <div class="form-control bg-light">
-              <strong th:text="${client.prenom + ' ' + client.nom}"></strong>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <label class="form-label fw-semibold">Entreprise</label>
-            <div class="form-control bg-light" th:text="${client.entreprise} ?: 'Non renseigné'"></div>
-          </div>
-          <div class="col-md-4">
-            <label class="form-label fw-semibold">Score prospect</label>
-            <div class="form-control bg-light" th:text="${client.scoreProspect} + '/10'"></div>
-          </div>
-        </div>
+<head>
+	<title>Gestion des opportunités</title>
+</head>
+<div layout:fragment="content">
+	<div class="container-fluid">
 
-        <!-- FORMULAIRE OPPORTUNITÉ -->
-        <div class="row g-3">
-          <div class="col-12">
-            <label class="form-label fw-semibold">Nom de l'opportunité *</label>
-            <input type="text" th:field="*{nomOpportunite}" class="form-control" 
-                   th:attr="placeholder='Ex: ' + (${client.entreprise} ?: ${client.prenom}) + ' - Projet 2024'" required>
-          </div>
+		<!-- EN-TETE -->
+		<div class="d-flex justify-content-between align-items-center mb-4">
+			<div>
+				<h4 class="text-primary mb-1">
+					<i class="ti ti-bullseye me-2"></i>Opportunités
+				</h4>
+				<p class="text-muted mb-0">Suivez votre pipeline commercial</p>
+			</div>
+		</div>
 
-          <div class="col-md-6">
-            <label class="form-label fw-semibold">Montant estimé (€)</label>
-            <input type="number" th:field="*{montantEstime}" class="form-control" 
-                   placeholder="Basé sur le score: [[${client.scoreProspect * 1000}]]">
-          </div>
+		<div th:if="${success}" class="alert alert-success alert-dismissible fade show" th:text="${success}">
+			<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+		</div>
+		<div th:if="${erreur}" class="alert alert-danger alert-dismissible fade show" th:text="${erreur}">
+			<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+		</div>
 
-          <div class="col-md-6">
-            <label class="form-label fw-semibold">Probabilité</label>
-            <select th:field="*{probabilite}" class="form-select">
-              <option th:each="i : ${#numbers.sequence(10, 90, 10)}" 
-                      th:value="${i}"
-                      th:selected="${i == client.scoreProspect * 10}"
-                      th:text="${i + '%'}">
-              </option>
-            </select>
-          </div>
+		<div class="card">
+			<div class="card-body">
+				<div class="table-responsive">
+					<table class="table table-striped table-hover align-middle">
+						<thead>
+							<tr>
+								<th>Opportunité</th>
+								<th>Client</th>
+								<th>Étape</th>
+								<th>Montant estimé</th>
+								<th>Probabilité</th>
+								<th>Clôture prévue</th>
+								<th>Statut</th>
+								<th class="text-end">Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="opportunite : ${opportunites}">
+								<td>
+									<div class="fw-bold" th:text="${opportunite.nomOpportunite}"></div>
+									<small class="text-muted" th:text="${opportunite.description}"></small>
+								</td>
+								<td>
+									<a th:if="${opportunite.idClient}" th:href="@{/clients/{id}(id=${opportunite.idClient})}"
+										th:text="${opportunite.nomClient}"></a>
+									<span th:unless="${opportunite.idClient}" class="text-muted">-</span>
+								</td>
+								<td><span class="badge bg-info" th:text="${opportunite.etapeVente}"></span></td>
+								<td th:text="${#numbers.formatDecimal(opportunite.montantEstime, 0, 'COMMA', 0, 'POINT')} + ' FCFA'"></td>
+								<td>
+									<div class="d-flex align-items-center">
+										<div class="progress flex-grow-1 me-2" style="height: 6px; width: 80px;">
+											<div class="progress-bar bg-primary" th:style="'width: ' + ${opportunite.probabilite} + '%;'"></div>
+										</div>
+										<small th:text="${opportunite.probabilite} + '%'"></small>
+									</div>
+								</td>
+								<td><small th:text="${opportunite.dateCloturePrevue != null} ? ${#temporals.format(opportunite.dateCloturePrevue, 'dd/MM/yyyy')} : '-'"></small></td>
+								<td>
+									<span th:classappend="'badge bg-' +
+										${opportunite.statut == 'GAGNEE' ? 'success' :
+										  opportunite.statut == 'PERDUE' ? 'danger' : 'warning'}"
+										th:text="${opportunite.statut}"></span>
+								</td>
+								<td>
+									<div class="d-flex justify-content-end gap-1">
+										<a th:href="@{/opportunitees/modifier/{id}(id=${opportunite.id})}"
+											class="btn btn-sm btn-outline-secondary" title="Modifier">
+											<i class="ti ti-edit"></i>
+										</a>
+										<a th:href="@{/opportunitees/supprimer/{id}(id=${opportunite.id})}"
+											class="btn btn-sm btn-outline-danger" title="Supprimer"
+											onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette opportunité ?')">
+											<i class="ti ti-trash"></i>
+										</a>
+									</div>
+								</td>
+							</tr>
 
-          <div class="col-md-6">
-            <label class="form-label fw-semibold">Date de clôture</label>
-            <input type="date" th:field="*{dateCloturePrevue}" class="form-control"
-                   th:value="${#temporals.format(#temporals.createNow().plusDays(30), 'yyyy-MM-dd')}">
-          </div>
+							<tr th:if="${#lists.isEmpty(opportunites)}">
+								<td colspan="8" class="text-center py-4">
+									<i class="ti ti-bullseye text-muted" style="font-size: 3rem;"></i>
+									<h5 class="text-muted mt-2">Aucune opportunité trouvée</h5>
+									<p class="text-muted">Les opportunités se créent depuis la fiche d'un client</p>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
 
-          <div class="col-md-6">
-            <label class="form-label fw-semibold">Étape</label>
-            <select th:field="*{etapeVente}" class="form-select">
-              <option value="PROSPECTION">Prospection</option>
-              <option value="QUALIFICATION" selected>Qualification</option>
-              <option value="PROPOSITION">Proposition</option>
-              <option value="NEGOCIATION">Négociation</option>
-            </select>
-          </div>
-
-          <div class="col-12">
-            <label class="form-label fw-semibold">Description</label>
-            <textarea th:field="*{description}" class="form-control" rows="3"
-                      th:attr="placeholder='Opportunité avec ' + ${client.prenom} + ' ' + ${client.nom} + '...'"></textarea>
-          </div>
-        </div>
-
-        <!-- CHAMP HIDDEN POUR LE CLIENT -->
-        <input type="hidden" th:field="*{client.id}">
-
-        <!-- ACTIONS -->
-        <div class="mt-4 pt-3 border-top d-flex gap-2 justify-content-between">
-          <a th:href="@{/clients/{id}(id=${client.id})}" class="btn btn-outline-secondary">
-            <i class="ti ti-arrow-left me-2"></i>Retour au client
-          </a>
-          <div>
-            <button type="submit" class="btn btn-primary">
-              <i class="ti ti-bullseye me-2"></i>Créer l'opportunité
-            </button>
-          </div>
-        </div>
-
-      </form>
-    </div>
-  </div>
+				<!-- PAGINATION -->
+				<div th:if="${totalPages > 1}" class="d-flex justify-content-between align-items-center mt-4">
+					<div class="text-muted">
+						Page <span th:text="${currentPage + 1}"></span> sur <span th:text="${totalPages}"></span>
+						(<span th:text="${page.totalElements}"></span> opportunités)
+					</div>
+					<nav>
+						<ul class="pagination mb-0">
+							<li class="page-item" th:classappend="${page.first} ? 'disabled'">
+								<a class="page-link" th:href="@{/opportunitees(page=${currentPage - 1}, size=${page.size})}">Précédent</a>
+							</li>
+							<li th:each="p : ${#numbers.sequence(0, totalPages - 1)}" class="page-item"
+								th:classappend="${p == currentPage} ? 'active'">
+								<a class="page-link" th:href="@{/opportunitees(page=${p}, size=${page.size})}" th:text="${p + 1}"></a>
+							</li>
+							<li class="page-item" th:classappend="${page.last} ? 'disabled'">
+								<a class="page-link" th:href="@{/opportunitees(page=${currentPage + 1}, size=${page.size})}">Suivant</a>
+							</li>
+						</ul>
+					</nav>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
+</html>

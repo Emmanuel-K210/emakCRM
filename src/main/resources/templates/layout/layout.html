@@ -1,16 +1,42 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org"
-	xmlns:layout="http://www.ultraq.net.nz/layout">
+	xmlns:layout="http://www.ultraq.net.nz/layout"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="_csrf" th:content="${_csrf.token}" />
+<meta name="_csrf_header" th:content="${_csrf.headerName}" />
 <title>emakCrm</title>
 <link rel="shortcut icon" type="image/png"
 	th:href="@{/ressources/images/logos/favicon.png}" />
 <link rel="stylesheet" th:href="@{/ressources/css/styles.min.css}" />
 <link rel="stylesheet"
 	href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<script th:inline="javascript">
+	// Injecte automatiquement le header CSRF (protection Spring Security) dans tous
+	// les appels fetch() existants de l'application (factures, devis, produits, tâches...)
+	// sans avoir à modifier chacun des scripts qui les effectuent.
+	(function () {
+		var token = document.querySelector('meta[name="_csrf"]').content;
+		var header = document.querySelector('meta[name="_csrf_header"]').content;
+		var originalFetch = window.fetch;
+		window.fetch = function (input, init) {
+			init = init || {};
+			var method = (init.method || 'GET').toUpperCase();
+			if (method !== 'GET' && method !== 'HEAD') {
+				init.headers = init.headers || {};
+				if (init.headers instanceof Headers) {
+					init.headers.append(header, token);
+				} else {
+					init.headers[header] = token;
+				}
+			}
+			return originalFetch(input, init);
+		};
+	})();
+</script>
 </head>
 
 <body>
@@ -64,10 +90,22 @@
 						<li class="nav-small-cap"><i class="ti ti-dollars"></i> <span
 							class="hide-menu">Ventes/Devis/Facture</span></li>
 						<li class="sidebar-item"><a
-							th:classappend="${pageActive} == 'ventes' ? 'active' : ''"
-							class="sidebar-link" th:href="@{/ventes}" aria-expanded="false">
-								<span> <i class="ti ti-file-invoice"></i>
-							</span> <span class="hide-menu">Ventes</span>
+							th:classappend="${pageActive} == 'opportunites' ? 'active' : ''"
+							class="sidebar-link" th:href="@{/opportunitees}" aria-expanded="false">
+								<span> <i class="ti ti-bullseye"></i>
+							</span> <span class="hide-menu">Opportunités</span>
+						</a></li>
+						<li class="sidebar-item"><a
+							th:classappend="${pageActive} == 'taches' ? 'active' : ''"
+							class="sidebar-link" th:href="@{/taches}" aria-expanded="false">
+								<span> <i class="ti ti-checklist"></i>
+							</span> <span class="hide-menu">Tâches</span>
+						</a></li>
+						<li class="sidebar-item"><a
+							th:classappend="${pageActive} == 'campagnes' ? 'active' : ''"
+							class="sidebar-link" th:href="@{/campagnes}" aria-expanded="false">
+								<span> <i class="ti ti-speakerphone"></i>
+							</span> <span class="hide-menu">Campagnes</span>
 						</a></li>
 						
 						<li class="sidebar-item"><a
@@ -100,18 +138,21 @@
 
 						<li class="nav-small-cap"><i class="ti ti-shield-lock"></i> <span
 							class="hide-menu">Utilisateurs/Roles</span></li>
-						<li class="sidebar-item"><a
+						<li class="sidebar-item" sec:authorize="hasRole('ADMIN')"><a
 							th:classappend="${pageActive} == 'utilisateurs' ? 'active' : ''"
 							class="sidebar-link" th:href="@{/utilisateurs}"
 							aria-expanded="false"> <span> <i class="ti ti-users"></i>
 							</span> <span class="hide-menu">Utilisateurs</span>
 						</a></li>
 
-						<li class="sidebar-item"><a class="sidebar-link"
-							th:href="@{/logout}" aria-expanded="false"> <span> <i
-									class="ti ti-logout"></i>
-							</span> <span class="hide-menu">Deconnexion</span>
-						</a></li>
+						<li class="sidebar-item">
+							<form th:action="@{/logout}" method="post" class="d-inline">
+								<button type="submit" class="sidebar-link border-0 bg-transparent w-100 text-start">
+									<span> <i class="ti ti-logout"></i>
+									</span> <span class="hide-menu">Deconnexion</span>
+								</button>
+							</form>
+						</li>
 					</ul>
 				</nav>
 				<!-- End Sidebar navigation -->
@@ -145,6 +186,7 @@
 									class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up"
 									aria-labelledby="drop2">
 									<div class="message-body">
+										<p class="px-3 mb-1 fw-semibold" sec:authentication="name">email@exemple.com</p>
 										<a href="javascript:void(0)"
 											class="d-flex align-items-center gap-2 dropdown-item"> <i
 											class="ti ti-user fs-6"></i>
@@ -153,8 +195,10 @@
 											class="d-flex align-items-center gap-2 dropdown-item"> <i
 											class="ti ti-mail fs-6"></i>
 											<p class="mb-0 fs-3">Mon Compte</p>
-										</a> <a href="@{/logout}"
-											class="btn btn-outline-primary mx-3 mt-2 d-block">Deconnexion</a>
+										</a>
+										<form th:action="@{/logout}" method="post" class="mx-3 mt-2">
+											<button type="submit" class="btn btn-outline-primary d-block w-100">Deconnexion</button>
+										</form>
 									</div>
 								</div></li>
 						</ul>

@@ -6,6 +6,7 @@ import com.emak.crm.entity.Opportunite;
 import com.emak.crm.exception.EntityNotFound;
 import com.emak.crm.service.ClientService;
 import com.emak.crm.service.OpportuniteService;
+import com.emak.crm.service.UtilisateurService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +23,7 @@ public class OpportuniteController {
 
     private final OpportuniteService opportuniteService;
     private final ClientService clientService;
+    private final UtilisateurService utilisateurService;
 
     @GetMapping
     public String listeOpportunites(Model model,
@@ -34,17 +36,22 @@ public class OpportuniteController {
         model.addAttribute("totalPages", page.getTotalPages());
         model.addAttribute("pageActive", "opportunites");
 
-        return "pages/opportunite/liste.html";
+        return "pages/opportunitees/opportunitees";
     }
     
     @GetMapping("/ajouter")
     public String formAjouter(Model model,@RequestParam(name="clientId")Long clientId,RedirectAttributes attributes) {
-    	var opp = OpportuniteRequest.builder().build();
+    	var opp = OpportuniteRequest.builder().idClient(clientId).build();
     	try {
 			var client = clientService.findById(clientId);
 			model.addAttribute("opportunite",opp);
 	        model.addAttribute("pageActive", "opportunites");
 			model.addAttribute("client", client);
+			model.addAttribute("statuts", com.emak.crm.enums.StatutOpportunite.values());
+			model.addAttribute("etapes", com.emak.crm.enums.EtapeVente.values());
+			model.addAttribute("modeEdition", false);
+			model.addAttribute("opportuniteId", (Long) null);
+			model.addAttribute("utilisateurs", utilisateurService.findAll());
 			return "pages/opportunitees/form.html";
 		} catch (EntityNotFound e) {
 			attributes.addFlashAttribute("messageError", e.getMessage());
@@ -65,18 +72,25 @@ public class OpportuniteController {
         OpportuniteResponse opportunite;
 		try {
 			opportunite = opportuniteService.findById(id);
+			var client = clientService.findById(opportunite.idClient());
 			model.addAttribute("opportunite", opportunite);
+			model.addAttribute("client", client);
+			model.addAttribute("statuts", com.emak.crm.enums.StatutOpportunite.values());
+			model.addAttribute("etapes", com.emak.crm.enums.EtapeVente.values());
+			model.addAttribute("modeEdition", true);
+			model.addAttribute("opportuniteId", opportunite.id());
+			model.addAttribute("utilisateurs", utilisateurService.findAll());
 		    model.addAttribute("pageActive", "opportunites");
 		} catch (EntityNotFound e) {
 			attributes.addFlashAttribute("erreur",e.getMessage());
-			return null;
+			return "redirect:/opportunitees";
 		}
       
         return "pages/opportunitees/form.html";
     }
 
     @PostMapping("/modifier/{id}")
-    public String modifier(@PathVariable Number id,
+    public String modifier(@PathVariable Long id,
                            @ModelAttribute OpportuniteRequest opportunite,
                            RedirectAttributes redirectAttributes) {
         try {
@@ -84,20 +98,20 @@ public class OpportuniteController {
 			redirectAttributes.addFlashAttribute("success", "✏️ Opportunité modifiée avec succès !");
 		} catch (EntityNotFound e) {
 			redirectAttributes.addFlashAttribute("erreur", e.getMessage());
-			return null;
+			return "redirect:/opportunitees";
 		}
-        return "redirect:/opportunites";
+        return "redirect:/opportunitees";
     }
 
     @GetMapping("/supprimer/{id}")
-    public String supprimer(@PathVariable Number id, RedirectAttributes redirectAttributes) {
+    public String supprimer(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
 			opportuniteService.deleteById(id);
 			redirectAttributes.addFlashAttribute("success", "🗑️ Opportunité supprimée avec succès !");
 		} catch (EntityNotFound e) {
 			redirectAttributes.addFlashAttribute("erreur", e.getMessage());
-			return null;
+			return "redirect:/opportunitees";
 		}
-        return "redirect:/opportunites";
+        return "redirect:/opportunitees";
     }
 }

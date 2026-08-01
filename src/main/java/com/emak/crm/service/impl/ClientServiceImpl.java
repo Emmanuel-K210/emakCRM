@@ -265,8 +265,10 @@ public class ClientServiceImpl implements ClientService {
 
 	@Override
 	public List<ClientResponse> searchClients(String searchTerm) {
-		// TODO Auto-generated method stub
-		return null;
+		String pattern = "%" + (searchTerm == null ? "" : searchTerm.trim()) + "%";
+		return clientRepository.findBySearchTerm(pattern).stream()
+				.map(ClientMapper::toResponse)
+				.collect(Collectors.toList());
 	}
 	
 	/**

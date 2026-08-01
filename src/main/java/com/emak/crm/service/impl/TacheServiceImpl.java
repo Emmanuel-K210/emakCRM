@@ -163,8 +163,12 @@ public class TacheServiceImpl implements TacheService {
 	 */
 	@Override
 	public List<TacheResponse> getTachesDuJour() {
-
-		return null;
+		java.time.LocalDate aujourdHui = java.time.LocalDate.now();
+		java.time.LocalDateTime debut = aujourdHui.atStartOfDay();
+		java.time.LocalDateTime fin = aujourdHui.atTime(23, 59, 59);
+		return tacheRepository.findByDateEcheanceBetween(debut, fin).stream()
+				.map(TacheMapper::toResponse)
+				.toList();
 	}
 
 	/**
@@ -173,8 +177,12 @@ public class TacheServiceImpl implements TacheService {
 	 */
 	@Override
 	public List<TacheResponse> getTachesEnRetard() {
-		// TODO Auto-generated method stub
-		return null;
+		return tacheRepository.findByDateEcheanceBeforeAndStatutNot(
+				java.time.LocalDateTime.now(), StatutTache.TERMINE)
+				.stream()
+				.filter(t -> t.getStatut() != StatutTache.ANNULE)
+				.map(TacheMapper::toResponse)
+				.collect(Collectors.toList());
 	}
 
 	/**

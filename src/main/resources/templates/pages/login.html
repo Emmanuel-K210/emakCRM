@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Connexion - emakCrm</title>
+	<link rel="shortcut icon" type="image/png" th:href="@{/ressources/images/logos/favicon.png}" />
+	<link rel="stylesheet" th:href="@{/ressources/css/styles.min.css}" />
+	<style>
+		body {
+			min-height: 100vh;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			background-color: #f5f7fa;
+		}
+		.login-card {
+			width: 100%;
+			max-width: 400px;
+		}
+	</style>
+</head>
+<body>
+	<div class="login-card">
+		<div class="card shadow-sm">
+			<div class="card-body p-4">
+				<div class="text-center mb-4">
+					<img th:src="@{/ressources/images/logos/dark-logo.svg}" width="160" alt="emakCrm" />
+				</div>
+				<h5 class="text-center mb-4">Connexion</h5>
+
+				<div th:if="${param.error}" class="alert alert-danger">
+					Email ou mot de passe incorrect.
+				</div>
+				<div th:if="${param.logout}" class="alert alert-success">
+					Vous avez été déconnecté avec succès.
+				</div>
+
+				<form th:action="@{/login}" method="post">
+					<div class="mb-3">
+						<label class="form-label fw-semibold">Email</label>
+						<input type="email" name="username" class="form-control" placeholder="vous@entreprise.com" required autofocus>
+					</div>
+					<div class="mb-3">
+						<label class="form-label fw-semibold">Mot de passe</label>
+						<input type="password" name="password" class="form-control" required>
+					</div>
+					<button type="submit" class="btn btn-primary w-100">
+						<i class="ti ti-login me-2"></i>Se connecter
+					</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
